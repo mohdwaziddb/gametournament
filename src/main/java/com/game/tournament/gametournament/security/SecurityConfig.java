@@ -23,7 +23,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-        //http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
     @Bean
@@ -39,12 +39,5 @@ public class SecurityConfig {
                 return authentication;
             }
         };
-    }
-
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        // Define your authentication mechanism here, such as in-memory authentication, JDBC authentication, etc.
-        // Example of in-memory authentication:
-        auth.inMemoryAuthentication()
-                .withUser("user").password("{noop}password").roles("USER");
     }
 }

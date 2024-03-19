@@ -1,34 +1,102 @@
 package com.game.tournament.gametournament.service;
 
-import com.game.tournament.gametournament.entity.User;
-import com.game.tournament.gametournament.jwt.IJwtProvider;
-import com.game.tournament.gametournament.security.UserPrincipal;
-import org.springframework.beans.factory.annotation.Autowired;
+
+
+import com.game.tournament.gametournament.model.AuthenticationResponse;
+import com.game.tournament.gametournament.model.Token;
+import com.game.tournament.gametournament.model.User;
+import com.game.tournament.gametournament.repository.TokenRepository;
+import com.game.tournament.gametournament.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class AuthenticationService {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final UserRepository repository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    @Autowired
-    private IJwtProvider jwtProvider;
+    private final TokenRepository tokenRepository;
 
-    public User signInAnReturnJWT(User signInRequest){
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword())
+    private final AuthenticationManager authenticationManager;
+
+    public AuthenticationService(UserRepository repository,
+                                 PasswordEncoder passwordEncoder,
+                                 JwtService jwtService,
+                                 TokenRepository tokenRepository,
+                                 AuthenticationManager authenticationManager) {
+        this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.tokenRepository = tokenRepository;
+        this.authenticationManager = authenticationManager;
+    }
+
+    public AuthenticationResponse register(User request) {
+
+        // check if user already exist. if exist than authenticate the user
+        if(repository.findByUsername(request.getUsername()).isPresent()) {
+            return new AuthenticationResponse(null, "User already exist");
+        }
+
+        User user = new User();
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+
+        user.setRole(request.getRole());
+
+        user = repository.save(user);
+
+        String jwt = jwtService.generateToken(user);
+
+        saveUserToken(jwt, user);
+
+        return new AuthenticationResponse(jwt, "User registration was successful");
+
+    }
+
+    public AuthenticationResponse authenticate(User request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsername(),
+                        request.getPassword()
+                )
         );
 
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        String jwt = jwtProvider.generateToken(userPrincipal);
+        User user = repository.findByUsername(request.getUsername()).orElseThrow();
+        String jwt = jwtService.generateToken(user);
 
-        User signinUser = userPrincipal.getUser();
-        signinUser.setToken(jwt);
+        revokeAllTokenByUser(user);
+        saveUserToken(jwt, user);
 
-        return signinUser;
+        return new AuthenticationResponse(jwt, "User login was successful");
+
+    }
+    private void revokeAllTokenByUser(User user) {
+        List<Token> validTokens = tokenRepository.findAllTokensByUser(user.getId());
+        if(validTokens.isEmpty()) {
+            return;
+        }
+
+        validTokens.forEach(t-> {
+            t.setLoggedOut(true);
+        });
+
+        tokenRepository.saveAll(validTokens);
+    }
+    private void saveUserToken(String jwt, User user) {
+        Token token = new Token();
+        token.setToken(jwt);
+        token.setLoggedOut(false);
+        token.setUser(user);
+        tokenRepository.save(token);
     }
 }

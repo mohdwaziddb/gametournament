@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class MVCController {
     @RequestMapping(value = "/login",method = {RequestMethod.GET,RequestMethod.POST})
     public String demo(){
-        return "dashboard/login";
+        return "dashboard/demo1";
     }
 }

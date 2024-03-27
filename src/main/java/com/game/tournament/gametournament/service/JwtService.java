@@ -1,6 +1,6 @@
 package com.game.tournament.gametournament.service;
 
-import com.game.tournament.gametournament.model.User;
+import com.game.tournament.gametournament.model.Users;
 import com.game.tournament.gametournament.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -16,7 +16,8 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "4bb6d1dfbafb64a681139d1586b6f1160d18159afd57c8c79136d7490630407c";
+    //private final String SECRET_KEY = "4bb6d1dfbafb64a681139d1586b6f1160d18159afd57c8c79136d7490630407c";
+    private final String SECRET_KEY = "dbtechparichay3232db3232mohdwaziddb2580qwertyasdf";
     private final TokenRepository tokenRepository;
 
     public JwtService(TokenRepository tokenRepository) {
@@ -62,7 +63,7 @@ public class JwtService {
     }
 
 
-    public String generateToken(User user) {
+    public String generateToken(Users user) {
         String token = Jwts
                 .builder().subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))

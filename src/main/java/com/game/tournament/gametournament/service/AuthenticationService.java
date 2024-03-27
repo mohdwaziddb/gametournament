@@ -3,8 +3,9 @@ package com.game.tournament.gametournament.service;
 
 
 import com.game.tournament.gametournament.model.AuthenticationResponse;
+import com.game.tournament.gametournament.model.Role;
 import com.game.tournament.gametournament.model.Token;
-import com.game.tournament.gametournament.model.User;
+import com.game.tournament.gametournament.model.Users;
 import com.game.tournament.gametournament.repository.TokenRepository;
 import com.game.tournament.gametournament.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,11 +14,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AuthenticationService {
 
-    private final UserRepository repository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
@@ -30,40 +32,78 @@ public class AuthenticationService {
                                  JwtService jwtService,
                                  TokenRepository tokenRepository,
                                  AuthenticationManager authenticationManager) {
-        this.repository = repository;
+        this.userRepository = repository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.tokenRepository = tokenRepository;
         this.authenticationManager = authenticationManager;
     }
 
-    public AuthenticationResponse register(User request) {
+    public AuthenticationResponse register(Users userrequest) {
 
         // check if user already exist. if exist than authenticate the user
-        if(repository.findByUsername(request.getUsername()).isPresent()) {
-            return new AuthenticationResponse(null, "User already exist");
+        String username = userrequest.getUsername();
+        if(username==null || username.equals("")){
+            return new AuthenticationResponse(null, "Username cannot be blank");
+        } else if (username.length() < 3) {
+            return new AuthenticationResponse(null, "Username must be at least 3 characters");
         }
 
-        User user = new User();
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        String emailid = userrequest.getEmailid();
+        if(emailid == null || emailid.equals("")){
+            return new AuthenticationResponse(null, "Email Id cannot be blank");
+        }
+        Long mobileno = userrequest.getMobileno();
+        if(mobileno == null || mobileno.equals("")){
+            return new AuthenticationResponse(null, "Mobile No. cannot be blank");
+        }
 
+        if(userRepository.findByUsername(username).isPresent()) {
+            return new AuthenticationResponse(null, "Username already exist");
+        }
 
-        user.setRole(request.getRole());
+        if(userRepository.findAllByEmailid(emailid).size()>0) {
+            return new AuthenticationResponse(null, "Email Id already exist");
+        }
 
-        user = repository.save(user);
+        if(userRepository.findAllByMobileno(mobileno).size()>0) {
+            return new AuthenticationResponse(null, "Mobile No. already exist");
+        }
+
+        Users user = new Users();
+        user.setFirstname(userrequest.getFirstname());
+        user.setLastname(userrequest.getLastname());
+        user.setUsername(username);
+        user.setEmailid(emailid);
+        user.setMobileno(mobileno);
+
+        String password = userrequest.getPassword();
+        if(password==null || password.equals("")){
+            return new AuthenticationResponse(null, "Password cannot be blank");
+        } else if (password.length() < 8) {
+            return new AuthenticationResponse(null, "Password must be at least 8 characters");
+        } else if (!password.matches(".*[^a-zA-Z0-9].*")) {
+            return new AuthenticationResponse(null, "Password must contain at least one symbol");
+        }
+        user.setPassword(passwordEncoder.encode(userrequest.getPassword()));
+
+        Role role = userrequest.getRole();
+        if(role==null || role.equals("")){
+            role=Role.USER;
+        }
+        user.setRole(role);
+
+        user = userRepository.save(user);
 
         String jwt = jwtService.generateToken(user);
 
         saveUserToken(jwt, user);
 
-        return new AuthenticationResponse(jwt, "User registration was successful");
+        return new AuthenticationResponse(jwt, "Signup Successfully");
 
     }
 
-    public AuthenticationResponse authenticate(User request) {
+    public AuthenticationResponse authenticate(Users request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -71,17 +111,17 @@ public class AuthenticationService {
                 )
         );
 
-        User user = repository.findByUsername(request.getUsername()).orElseThrow();
+        Users user = userRepository.findByUsername(request.getUsername()).orElseThrow();
         String jwt = jwtService.generateToken(user);
 
         revokeAllTokenByUser(user);
         saveUserToken(jwt, user);
 
-        return new AuthenticationResponse(jwt, "User login was successful");
+        return new AuthenticationResponse(jwt, "Login Successfully");
 
     }
-    private void revokeAllTokenByUser(User user) {
-        List<Token> validTokens = tokenRepository.findAllTokensByUser(user.getId());
+    private void revokeAllTokenByUser(Users user) {
+        List<Token> validTokens = tokenRepository.findAllTokensByUsers(user.getId());
         if(validTokens.isEmpty()) {
             return;
         }
@@ -92,11 +132,11 @@ public class AuthenticationService {
 
         tokenRepository.saveAll(validTokens);
     }
-    private void saveUserToken(String jwt, User user) {
+    private void saveUserToken(String jwt, Users user) {
         Token token = new Token();
         token.setToken(jwt);
         token.setLoggedOut(false);
-        token.setUser(user);
+        token.setUsers(user);
         tokenRepository.save(token);
     }
 }

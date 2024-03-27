@@ -7,26 +7,25 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Getter
 @Setter
-public class User implements UserDetails {
+public class Users implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "first_name")
-    private String firstName;
+    private String firstname;
 
     @Column(name = "last_name")
-    private String lastName;
+    private String lastname;
 
     @Column(name = "username",unique = true,nullable = false,length = 100)
     private String username;
@@ -34,13 +33,19 @@ public class User implements UserDetails {
     @Column(name = "password",nullable = false,length = 100)
     private String password;
 
+    @Column(name = "mobileno",nullable = false,length = 15)
+    private Long mobileno;
+
+    @Column(name = "emailid",nullable = false,length = 30)
+    private String emailid;
+
     /*@Column(name = "createdon",nullable = false)
     private LocalDateTime createdon;*/
 
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "users")
     private List<Token> tokens;
 
     @Override

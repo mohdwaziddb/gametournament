@@ -33,17 +33,7 @@ function showValidationMessage(messageHeader, messageType, message) {
     });
 }
 
-function showPassword() {
-    var a = document.getElementById("password");
-    var b = document.getElementById("EYE");
-    if (a.type == "password") {
-        a.type = "text";
-        b.src = "https://resources.edunexttechnologies.com/web-data/edunext-website/img/eyeon.svg";
-    } else {
-        a.type = "password";
-        b.src = "https://resources.edunexttechnologies.com/web-data/edunext-website/img/eye-off.svg";
-    }
-}
+
 
 
 var Base64 = {
@@ -154,4 +144,124 @@ var Base64 = {
         }
         return string;
     }
+}
+
+function showPassword() {
+    var passwordField = document.getElementById("password");
+    var icon = document.querySelector(".password-icon i");
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        passwordField.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    }
+}
+
+function toggleMenu() {
+    var slider = document.getElementById("slider");
+    if (slider.style.width === "250px") {
+        slider.style.width = "0";
+    } else {
+        slider.style.width = "250px";
+    }
+}
+
+function getHeaders(method) {
+    var headers = {
+        "Connection-Type": "_read"
+    };
+    if (method == "GET" || method == "get") {
+        headers["Connection-Type"] = "_read"
+    }
+
+    if (method == "POST" || method == "post" || method == "delete" || method == "DELETE" || method == "PUT" || method == "put") {
+        headers["Connection-Type"] = "_write"
+    }
+
+    //headers["Authorization"] = "Bearer " + $("#access_token_rest").val();
+    return headers;
+}
+
+function localStorageUsernameAndTokenValidation(){
+    let jwttoken = localStorage.getItem("token");
+    let username = localStorage.getItem("username");
+
+    if(jwttoken == null && jwttoken ==""){
+        return;
+    }
+
+    let data = {
+        'username':username,
+        'token': jwttoken
+    };
+    let domain = getDomain() + "/rest/authentication/token_authenticate";
+    $.ajax({
+        type: "POST",
+        url: domain,
+        contentType: 'application/json',
+        headers: getHeaders("POST"),
+        data: JSON.stringify(data),
+        success: function (response) {
+            if(response.success){
+                window.location.href="/game/homepage";
+            }
+        }, error: function (error) {
+            //console.log("Welcome");
+            if(error.responseJSON.message === "JWT Token Expire"){
+
+                if(window.location.pathname != "/login"){
+                    showValidationMessage("ERROR", "error", "Token Expire - Login Again");
+                    setTimeout(function () {
+                    window.location.href="/login";
+                    }, 1500);
+                }
+                /*if(window.location.pathname == "/login"){
+                    showValidationMessage("ERROR", "error", "Token Expire - Login Again");
+                }*/
+
+            }
+
+        }
+    });
+}
+
+function showAdminDashboardProfile(){
+    let jwttoken = localStorage.getItem("token");
+    let username = localStorage.getItem("username");
+
+    if(jwttoken == null && jwttoken ==""){
+        return;
+    }
+
+    let data = {
+        'username':username,
+        'token': jwttoken
+    };
+    let domain = getDomain() + "/rest/authentication/token_authenticate";
+    $.ajax({
+        type: "POST",
+        url: domain,
+        contentType: 'application/json',
+        headers: getHeaders("POST"),
+        data: JSON.stringify(data),
+        success: function (response) {
+            if(response.success){
+                window.location.href="/game/homepage";
+            }
+        }, error: function (error) {
+            console.log("Welcome");
+            /*if(!error.responseJSON.success){
+                showValidationMessage("ERROR", "error", error.responseJSON.message);
+            }*/
+
+        }
+    });
+}
+
+function getDomain(){
+
+    return "http://localhost:3232";
 }

@@ -5,10 +5,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
-@RequestMapping("/mvc")
-public class MVCController {
-    @RequestMapping(value = "/login",method = {RequestMethod.GET,RequestMethod.POST})
-    public String demo(){
-        return "dashboard/demo1";
+@RequestMapping("/game")
+public class GameMVCController {
+
+    @RequestMapping(value = "/homepage",method = {RequestMethod.GET,RequestMethod.POST})
+    public String homepage(){
+        return "dashboard/homepage";
     }
+
 }

@@ -20,12 +20,9 @@ public class Games {
 
     private String description;
 
-    private String attachment;
-
     private String createdon;
 
-    @ManyToMany(mappedBy = "games")
-    private List<Tournaments> tournaments;
+    private Boolean isdeleted;
 
 }
 

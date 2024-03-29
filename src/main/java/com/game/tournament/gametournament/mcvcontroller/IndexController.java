@@ -11,7 +11,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class IndexController {
 
     @RequestMapping(value = "/", method = {RequestMethod.GET, RequestMethod.POST})
-    public String index(HttpServletRequest req, ModelMap modelMap) {
+    public String signup(HttpServletRequest req, ModelMap modelMap) {
+        return "dashboard/signup";
+    }
+
+    @RequestMapping(value = "/login", method = {RequestMethod.GET, RequestMethod.POST})
+    public String longin(HttpServletRequest req, ModelMap modelMap) {
         return "dashboard/login";
+    }
+
+    @RequestMapping(value = "/forgetpassword", method = {RequestMethod.GET, RequestMethod.POST})
+    public String forgetpassword(HttpServletRequest req, ModelMap modelMap) {
+        return "dashboard/forgetpassword";
     }
 }

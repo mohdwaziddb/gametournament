@@ -21,7 +21,7 @@ public class Tournaments {
 
     private String description;
 
-    private Long price;
+    private Long priceid;
 
     private String date;
 
@@ -31,19 +31,19 @@ public class Tournaments {
 
     private String secretcode;
 
-    private String minimumplayer;
+    private Long minimumplayer;
 
-    private String maximumplayer;
+    private Long maximumplayer;
 
     private String createdon;
 
-    @ManyToMany
-    @JoinTable(
-            name = "tournament_games",
-            joinColumns = @JoinColumn(name = "tournament_id"),
-            inverseJoinColumns = @JoinColumn(name = "game_id")
-    )
-    private List<Games> games;
+    private String attachment;
+
+    private Long gameid;
+
+    private Boolean isdeleted;
+
+    private Boolean iscompleted;
 
 }
 

@@ -1,107 +1,89 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
-<head>
-    <title>Login</title>
-    <link rel="stylesheet" href="/Common/css/jquery.toast.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <script type="text/javascript" src="/Common/js/common.js"></script>
-    <script type="text/javascript" src="/Common/js/jquery.toast.js"></script>
-</head>
+
+<%@ include file="/WEB-INF/jsp/dashboard/header.jsp"%>
+<title>Log-In</title>
+<link id="manifest"  rel="manifest" crossorigin="use-credentials" href="/manifest.json">
+<style>
+
+</style>
 
 <body>
-Employee Login Page :-<br><br>
-<input type='text' id="username" name="username" class='form-control' placeholder='Enter Username'>
-<label class='label_input' id='username_label_input'>Enter Username</label>
-<br>
+<div class="container">
+    <h2>Log In</h2>
+    <input type="text" placeholder="Username" id="username">
+    <div class="password-icon">
+        <input type="password" id="password" placeholder="Password">
+        <i class="fas fa-eye" onclick="showPassword()"></i>
+    </div>
+    <button onclick="loginButton()">Login</button>
+    <div class="btn-container">
+        <a class="login-link" onclick="forgetPasswordClick()">Forget Password?</a>
+        <p style="margin-top: 20px;">Create New Account</p>
+        <button type="button" onclick="signupClick()">Sign-Up</button>
+    </div>
 
-<input type='password' class='form-control' id="password" name="password" placeholder='Enter Password'>
-<img onclick="showPassword()" src="https://resources.edunexttechnologies.com/web-data/edunext-website/img/eye-off.svg" id="EYE" class="calendar_icon">
-<br><br>
-<button id="user_login_btn">Sign In</button>
-
-<br><br>
-<button id="user_create_btn">Create New Account</button>
-
-<br>
-<br>
-<button class="btn btn-lg btn-primary" id="submit" onclick="location.href ='/mvc/dashboard/employee'" >
-    Employees List
-</button>
+</div>
 
 
-<%--<script>--%>
-<%--    $(document).ready(function () {--%>
+<script>
 
-<%--        $("#user_login_btn").click(function () {--%>
-<%--                var username1 = $("#username").val();--%>
-<%--                var password1 = $("#password").val();--%>
-<%--                try {--%>
-<%--                    if(username1 === ''){--%>
-<%--                        showValidationMessage("ERROR", "error", "Enter User Name");--%>
-<%--                        return;--%>
-<%--                    }--%>
-<%--                    if(password1 === ''){--%>
-<%--                        showValidationMessage("ERROR", "error", "Enter Password");--%>
-<%--                        return;--%>
-<%--                    }--%>
-<%--                    checkLoginDetail()--%>
-<%--                } catch (e) {--%>
-<%--                    console.log('Unable to login', e);--%>
-<%--                }--%>
-<%--            }--%>
-<%--        );--%>
+    function signupClick(){
+        window.location.href = window.location.origin;
+    }
 
-<%--        $("#user_create_btn").click(function () {--%>
-<%--            window.location.href="/mvc/dashboard/createaccount";--%>
-<%--        })--%>
+    function forgetPasswordClick(){
+        window.location.href = "/forgetpassword";
+    }
+    $(document).ready(function () {
+        localStorageUsernameAndTokenValidation();
+    });
 
+    function loginButton(){
+        let username = $('#username').val();
+        let password = $('#password').val();
+        if(username==undefined || username==null || username==""){
+            return showValidationMessage("ERROR", "error", "Username cannot be blank");
+        }
+        if(password==undefined || password==null || password==""){
+            return showValidationMessage("ERROR", "error", "Password cannot be blank");
+        }
 
-<%--    });--%>
+        let data = {
+            'username':username,
+            'password': password
+        };
 
-<%--    function checkLoginDetail() {--%>
-<%--        var username = $("#username").val();--%>
-<%--        var password = $("#password").val();--%>
-<%--        var domain = window.location.origin;--%>
-<%--        var dataurl = domain + "/api/testing/login";--%>
+        let domain = getDomain() + "/rest/authentication/login";
 
-<%--        var datapass = {--%>
-<%--            "username":username,--%>
-<%--            "password":password,--%>
-<%--        }--%>
+        $.ajax({
+            type: "POST",
+            url: domain,
+            contentType: 'application/json',
+            headers: getHeaders("POST"),
+            data: JSON.stringify(data),
+            success: function (response) {
+                //console.log(response);
+                if(response.success){
+                    let jwttoken = response.message;
+                    localStorage.setItem("token", jwttoken);
+                    localStorage.setItem("username", username);
 
-<%--        $.ajax({--%>
-<%--            type:"POST",--%>
-<%--            data:{--%>
-<%--                "username":username,--%>
-<%--                "password":password,--%>
-<%--            },--%>
-<%--            contentType:"application/json",--%>
-<%--            url:"/api/testing/login",--%>
-<%--            success:function (response) {--%>
-<%--                console.log(response)--%>
-<%--                if(response.message == "success"){--%>
-<%--                    //showValidationMessage("Success", "success", "Login Success");--%>
-<%--                    localStorage.setItem("username", username);--%>
-<%--                    localStorage.setItem("password", Base64.encode(password));--%>
+                    //setTimeout(function () {
+                        window.location.href="/game/homepage";
+                    //}, 2000);
+                }
 
-<%--                    window.location.href="/mvc/dashboard/employeedetail";--%>
+            }, error: function (error) {
+                if(!error.responseJSON.success){
+                    showValidationMessage("ERROR", "error", error.responseJSON.message);
+                }
 
-<%--                } else {--%>
-<%--                    showValidationMessage("ERROR", "error", "Wrong login information");--%>
-<%--                }--%>
-<%--            },--%>
-<%--            complete: function (res) {--%>
-<%--                //showValidationMessage("Success", "success", "Login Success");--%>
-<%--            },--%>
-<%--            error: function (error) {--%>
-<%--                showValidationMessage("ERROR", "error", "Wrong login information");--%>
-<%--            },--%>
-
-<%--        })--%>
+            }
+        });
+    }
 
 
-<%--    }--%>
-<%--</script>--%>
+</script>
+
+<%@ include file="/WEB-INF/jsp/dashboard/footer.jsp"%>
 </body>
-
 </html>

@@ -8,12 +8,20 @@ import com.game.tournament.gametournament.model.Token;
 import com.game.tournament.gametournament.model.Users;
 import com.game.tournament.gametournament.repository.TokenRepository;
 import com.game.tournament.gametournament.repository.UserRepository;
+import com.game.tournament.gametournament.utils.DataTypeUtility;
+import com.game.tournament.gametournament.utils.MobileResponseDTOFactory;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -27,6 +35,9 @@ public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
+    @Autowired
+    private MobileResponseDTOFactory mobileResponseDTOFactory;
+
     public AuthenticationService(UserRepository repository,
                                  PasswordEncoder passwordEncoder,
                                  JwtService jwtService,
@@ -39,35 +50,44 @@ public class AuthenticationService {
         this.authenticationManager = authenticationManager;
     }
 
-    public AuthenticationResponse register(Users userrequest) {
+    public ResponseEntity<?> register(Users userrequest) {
 
-        // check if user already exist. if exist than authenticate the user
         String username = userrequest.getUsername();
         if(username==null || username.equals("")){
-            return new AuthenticationResponse(null, "Username cannot be blank");
+            return mobileResponseDTOFactory.failedMessage("Username cannot be blank");
         } else if (username.length() < 3) {
-            return new AuthenticationResponse(null, "Username must be at least 3 characters");
+            return mobileResponseDTOFactory.failedMessage("Username must be at least 3 characters");
+        }
+
+        Long mobileno = userrequest.getMobileno();
+        if(mobileno == null || mobileno.equals("")){
+            return mobileResponseDTOFactory.failedMessage("Mobile No. cannot be blank");
         }
 
         String emailid = userrequest.getEmailid();
         if(emailid == null || emailid.equals("")){
-            return new AuthenticationResponse(null, "Email Id cannot be blank");
+            return mobileResponseDTOFactory.failedMessage("Email Id cannot be blank");
         }
-        Long mobileno = userrequest.getMobileno();
-        if(mobileno == null || mobileno.equals("")){
-            return new AuthenticationResponse(null, "Mobile No. cannot be blank");
+
+        String password = userrequest.getPassword();
+        if(password==null || password.equals("")){
+            return mobileResponseDTOFactory.failedMessage("Password cannot be blank");
+        } else if (password.length() < 8) {
+            return mobileResponseDTOFactory.failedMessage("Password must be at least 8 characters");
+        } else if (!password.matches(".*[^a-zA-Z0-9].*")) {
+            return mobileResponseDTOFactory.failedMessage("Password must contain at least one symbol");
         }
 
         if(userRepository.findByUsername(username).isPresent()) {
-            return new AuthenticationResponse(null, "Username already exist");
+            return mobileResponseDTOFactory.failedMessage("Username already exist");
         }
 
         if(userRepository.findAllByEmailid(emailid).size()>0) {
-            return new AuthenticationResponse(null, "Email Id already exist");
+            return mobileResponseDTOFactory.failedMessage("Email Id already exist");
         }
 
         if(userRepository.findAllByMobileno(mobileno).size()>0) {
-            return new AuthenticationResponse(null, "Mobile No. already exist");
+            return mobileResponseDTOFactory.failedMessage("Mobile No. already exist");
         }
 
         Users user = new Users();
@@ -77,14 +97,6 @@ public class AuthenticationService {
         user.setEmailid(emailid);
         user.setMobileno(mobileno);
 
-        String password = userrequest.getPassword();
-        if(password==null || password.equals("")){
-            return new AuthenticationResponse(null, "Password cannot be blank");
-        } else if (password.length() < 8) {
-            return new AuthenticationResponse(null, "Password must be at least 8 characters");
-        } else if (!password.matches(".*[^a-zA-Z0-9].*")) {
-            return new AuthenticationResponse(null, "Password must contain at least one symbol");
-        }
         user.setPassword(passwordEncoder.encode(userrequest.getPassword()));
 
         Role role = userrequest.getRole();
@@ -98,27 +110,45 @@ public class AuthenticationService {
         String jwt = jwtService.generateToken(user);
 
         saveUserToken(jwt, user);
-
-        return new AuthenticationResponse(jwt, "Signup Successfully");
-
+        return mobileResponseDTOFactory.successMessage(jwt);
     }
 
-    public AuthenticationResponse authenticate(Users request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+    public ResponseEntity<?> authenticate(Users userrequest) {
+        String username = userrequest.getUsername();
+        if(username == null || username.equals("")){
+            return mobileResponseDTOFactory.failedMessage("Username cannot be blank");
+        }
+        String password = userrequest.getPassword();
+        if(password == null || password.equals("")){
+            return mobileResponseDTOFactory.failedMessage("Password cannot be blank");
+        }
 
-        Users user = userRepository.findByUsername(request.getUsername()).orElseThrow();
+        List<Users> user_list = userRepository.findAllByUsername(username);
+        if(user_list == null || user_list.size()==0){
+            return mobileResponseDTOFactory.failedMessage("Username is incorrect");
+        }
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            userrequest.getUsername(),
+                            userrequest.getPassword()
+                    )
+            );
+        } catch (UsernameNotFoundException e){
+            e.printStackTrace();
+            return mobileResponseDTOFactory.failedMessage("Bad Credential...");
+        } catch (AuthenticationException e){
+            e.printStackTrace();
+            return mobileResponseDTOFactory.failedMessage("Bad Credential...");
+        }
+
+        Users user = user_list.get(0);
         String jwt = jwtService.generateToken(user);
 
         revokeAllTokenByUser(user);
         saveUserToken(jwt, user);
-
-        return new AuthenticationResponse(jwt, "Login Successfully");
-
+        return mobileResponseDTOFactory.successMessage(jwt);
     }
     private void revokeAllTokenByUser(Users user) {
         List<Token> validTokens = tokenRepository.findAllTokensByUsers(user.getId());
@@ -138,5 +168,74 @@ public class AuthenticationService {
         token.setLoggedOut(false);
         token.setUsers(user);
         tokenRepository.save(token);
+    }
+
+    public ResponseEntity<?> forgetPassword(Users userrequest) {
+        String username = userrequest.getUsername();
+        Long mobileno = userrequest.getMobileno();
+        String emailid = userrequest.getEmailid();
+        String newpassword = userrequest.getPassword();
+        if(username == null || username.equals("")){
+            return mobileResponseDTOFactory.failedMessage("Username cannot be blank");
+        }
+        if(mobileno == null || mobileno.equals("")){
+            return mobileResponseDTOFactory.failedMessage("Mobile No. cannot be blank");
+        }
+        if(emailid == null || emailid.equals("")){
+            return mobileResponseDTOFactory.failedMessage("Email Id cannot be blank");
+        }
+        List<Users> user_list = userRepository.findAllByUsername(username);
+        if(user_list == null || user_list.size()==0){
+            return mobileResponseDTOFactory.failedMessage("Username not matched");
+        }
+        Users user = user_list.get(0);
+        if(!user.getMobileno().equals(mobileno)){
+            return mobileResponseDTOFactory.failedMessage("Mobile No. not matched");
+        }
+        if(!user.getEmailid().equalsIgnoreCase(emailid)){
+            return mobileResponseDTOFactory.failedMessage("Email Id not matched");
+        }
+        if(newpassword != null){
+            if (newpassword.length() < 8){
+                return mobileResponseDTOFactory.failedMessage("New Password must be at least 8 characters");
+            } else if (!newpassword.matches(".*[^a-zA-Z0-9].*")) {
+                return mobileResponseDTOFactory.failedMessage("New Password must contain at least one symbol");
+            } else if (passwordEncoder.matches(newpassword,user.getPassword())) {
+                return mobileResponseDTOFactory.failedMessage("New Password cannot be same to Old Password");
+            }
+
+            user.setPassword(passwordEncoder.encode(newpassword));
+            userRepository.save(user);
+            revokeAllTokenByUser(user);
+        }
+
+        return mobileResponseDTOFactory.successMessage("Successfully");
+    }
+
+    public ResponseEntity<?> tokenAuthenticate(Map<String ,Object> param, HttpServletRequest request) {
+        String token = DataTypeUtility.stringValue(param.get("token"));
+        String username = DataTypeUtility.stringValue(param.get("username"));
+
+        if(token != null && !token.equals("")){
+            boolean present = tokenRepository.findByToken(token).isPresent();
+            if(present) {
+                Token tokenmodal = tokenRepository.findByToken(token).get();
+                boolean loggedOut = tokenmodal.isLoggedOut();
+                Users users = tokenmodal.getUsers();
+                String token_username = users.getUsername();
+                if (username.equals(token_username)){
+                    if (!loggedOut) {
+                        boolean valid = jwtService.isValid(token, users);
+                        if (valid) {
+                            return mobileResponseDTOFactory.successMessage("Successfully Matched");
+                        } else {
+                            return mobileResponseDTOFactory.failedMessage("JWT Token Expire");
+                        }
+                    }
+                 }
+            }
+        }
+
+        return mobileResponseDTOFactory.failedMessage("Not Matched");
     }
 }

@@ -163,16 +163,16 @@ input[type="number"]::-webkit-outer-spin-button {
     font-size: 14px;
 }
 .card .details .join-btn {
-    display: block;
-    width: 100%;
+    width: 45%;
     padding: 10px;
-    background-color: #007bff;
+    background-color: #2ecc71;
     color: #fff;
     text-align: center;
     text-decoration: none;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    margin: 7px;
 }
 
 .textAreaCss{

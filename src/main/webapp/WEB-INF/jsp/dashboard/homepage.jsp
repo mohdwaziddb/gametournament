@@ -59,7 +59,10 @@
                             +'<p>Game Date: '+date+'</p>'
                             +'<p>Start Time: '+starttime+'</p>'
                             +'<p>End Time: '+endtime+'</p>'
-                            +'<button class="join-btn" onclick="joinButCLick('+id+')">Join</button>'
+                            +'<div>' +
+                            '<button class="join-btn" onclick="joinButCLick('+id+')">Join Game</button>' +
+                            '<button style="background-color: blue;" class="join-btn" onclick="moreDetailsButClick('+id+')">More Details</button>' +
+                            '</div>'
                             +'</div>'
                             +'</div>'
                             +'</div>'
@@ -77,6 +80,10 @@
     }
 
     function joinButCLick(id){
+        console.log(id)
+    }
+
+    function moreDetailsButClick(id){
         console.log(id)
     }
 

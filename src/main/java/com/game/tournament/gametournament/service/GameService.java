@@ -477,7 +477,7 @@ public class GameService {
 
     }
 
-    public Object createTransaction(Map<String ,Object> param) {
+    public Object createTransaction(Map<String ,Object> param, HttpServletRequest request) {
         Double amount = DataTypeUtility.doubleZeroValue(param.get("amount"));
         try {
             JSONObject orderRequest = new JSONObject();
@@ -486,7 +486,7 @@ public class GameService {
 
             RazorpayClient razorpayClient = new RazorpayClient(Key,Key_Secret);
             Order order = razorpayClient.orders.create(orderRequest);
-            TransactionalDetails transactionalDetails = prepareTransactionalDetails(order);
+            TransactionalDetails transactionalDetails = prepareTransactionalDetails(order,request);
             return transactionalDetails;
         } catch (Exception e){
             System.out.println(e.getMessage());;
@@ -494,12 +494,23 @@ public class GameService {
         }
     }
 
-    private TransactionalDetails prepareTransactionalDetails(Order order){
+    private TransactionalDetails prepareTransactionalDetails(Order order,HttpServletRequest request) throws Exception{
         String orderid = DataTypeUtility.stringValue(order.get("id"));
         String currency = DataTypeUtility.stringValue(order.get("currency"));
         Integer amount = DataTypeUtility.integerValue(order.get("amount"));
+        Long currentUserId = mobileResponseDTOFactory.getCurrentUserId(request);
+        List<Users> user_list = userRepository.findAll();
+        Map<Long,Users> user_map = new HashMap<>();
+        if(user_list!=null && user_list.size()>0){
+            for (Users modal : user_list) {
+                user_map.put(modal.getId(),modal);
+            }
+        }
+        String username = user_map.get(currentUserId).getUsername();
+        Long mobileno = user_map.get(currentUserId).getMobileno();
+        String emailid = user_map.get(currentUserId).getEmailid();
 
-        TransactionalDetails transactionalDetails = new TransactionalDetails(orderid,amount,currency,Key,Key_Secret);
+        TransactionalDetails transactionalDetails = new TransactionalDetails(orderid,amount,currency,Key,Key_Secret,username,mobileno,emailid);
         return transactionalDetails;
     }
 

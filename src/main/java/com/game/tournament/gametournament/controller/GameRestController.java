@@ -129,9 +129,9 @@ public class GameRestController {
     }
 
     @GetMapping("/createtransaction")
-    public Object createTransaction(@RequestParam Map<String,Object> param) {
+    public Object createTransaction(@RequestParam Map<String,Object> param,HttpServletRequest request) {
         try {
-            return gameService.createTransaction(param);
+            return gameService.createTransaction(param,request);
         } catch (Exception e) {
             return mobileResponseDTOFactory.reportInternalServerError(e);
         }

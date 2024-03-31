@@ -45,5 +45,14 @@ public class Tournaments {
 
     private Boolean iscompleted;
 
+    @Transient
+    private String price;
+
+    @Transient
+    private String game;
+
+    @Transient
+    private Boolean isjoin;
+
 }
 

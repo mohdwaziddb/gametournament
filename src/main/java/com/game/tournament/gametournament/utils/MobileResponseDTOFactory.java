@@ -60,9 +60,14 @@ public class MobileResponseDTOFactory {
         return new ResponseEntity<MobileResponseDTO>(mobileResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    public String getCurrentUserName(HttpServletRequest request) {
+        String username = DataTypeUtility.stringValue(request.getAttribute("__username__"));
+        return username;
+    }
+
     public Long getCurrentUserId(HttpServletRequest request) {
-        Long employeeid = DataTypeUtility.getForeignKeyValue(request.getAttribute("_current_userid_"));
-        return employeeid;
+        Long userid = DataTypeUtility.longValue(request.getAttribute("__userid__"));
+        return userid;
     }
 
 }

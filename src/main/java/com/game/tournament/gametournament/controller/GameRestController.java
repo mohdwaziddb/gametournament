@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -107,15 +108,45 @@ public class GameRestController {
             return mobileResponseDTOFactory.reportInternalServerError(e);
         }
     }
-
+    //@PreAuthorize("hasRole('Admin')")
     @GetMapping("/get_tournaments_foruser")
-    public Object getTournamentsForUser(@RequestParam Map<String, Object> param) {
+    public Object getTournamentsForUser(@RequestParam Map<String, Object> param, HttpServletRequest request) {
         try {
-            return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getTournamentsForUser(param)), HttpStatus.OK);
+            return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getTournamentsForUser(param,request)), HttpStatus.OK);
         } catch (Exception e) {
             return mobileResponseDTOFactory.reportInternalServerError(e);
         }
     }
+
+
+    @PostMapping("/joining_tournament")
+    public ResponseEntity<?> joiningTournament(@RequestBody Map<String, Object> param, HttpServletRequest request) {
+        try {
+            return gameService.joiningTournament(param,request);
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
+
+    @GetMapping("/createtransaction")
+    public Object createTransaction(@RequestParam Map<String,Object> param) {
+        try {
+            return gameService.createTransaction(param);
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
+
+    @GetMapping("/getplayerdetails")
+    public Object getPlayerDetails(@RequestParam Map<String, Object> param, HttpServletRequest request) {
+        try {
+            return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getPlayerDetails(param,request)), HttpStatus.OK);
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
+
+
 
 
 }

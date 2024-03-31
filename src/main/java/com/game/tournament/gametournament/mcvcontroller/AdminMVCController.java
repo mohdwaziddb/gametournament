@@ -35,4 +35,14 @@ public class AdminMVCController {
         return "dashboard/addedittournamentpage";
     }
 
+    @RequestMapping(value = "/runningtournament",method = {RequestMethod.GET,RequestMethod.POST})
+    public String runningTournament(){
+        return "dashboard/runningtournament";
+    }
+
+    @RequestMapping(value = "/paymenthistory",method = {RequestMethod.GET,RequestMethod.POST})
+    public String paymentHistory(){
+        return "dashboard/paymenthistory";
+    }
+
 }

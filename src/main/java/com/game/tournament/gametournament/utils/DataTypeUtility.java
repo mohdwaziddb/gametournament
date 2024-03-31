@@ -178,4 +178,48 @@ public class DataTypeUtility {
         return map;
     }
 
+    public static int integerValue(Object value) {
+//        //// System.out.println("inside integerValue " + value instanceof String);
+        if (value instanceof String) {
+            String svalue = DataTypeUtility.stringValue(value);
+            if (svalue.length() == 0) {
+                return 0;
+            } else if (svalue.equalsIgnoreCase("null")) {
+                return 0;
+            }
+            return Integer.parseInt(svalue);
+        }
+
+        if (value instanceof Double) {
+            return (int) (double) (Double) value;
+        }
+        if (value instanceof Float) {
+            return (int) (float) (Float) value;
+        }
+        if (value instanceof Long) {
+            return (int) (long) (Long) value;
+        }
+        return (value == null ? 0 : (Integer) value);
+    }
+
+    public static Double doubleZeroValue(Object value) {
+        if (value != null && !value.toString().equalsIgnoreCase("undefined")) {
+            if (value instanceof Float) {
+                Float svalue = (Float) value;
+                Double val = Double.valueOf(svalue.toString());
+                return val;
+            }
+            if (value instanceof Long) {
+                Long svalue = (Long) value;
+                Double val = (double) (long) svalue;
+                return val;
+            }
+
+            if (value.toString().length() != 0) {
+                return Double.valueOf(value.toString());
+            }
+        }
+        return 0d;
+    }
+
 }

@@ -8,6 +8,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,24 @@ public class JwtService {
             return extractClaim(token, Claims::getSubject);
         } catch (Exception e){
             return "JWT Token Expire";
+        }
+    }
+
+    public Object getUserid(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            if (claims != null) {
+                Integer userId = claims.get("userid", Integer.class);
+                if (userId != null) {
+                    return userId;
+                } else {
+                    return "User ID not found in JWT token";
+                }
+            } else {
+                return "Claims not found in JWT token";
+            }
+        } catch (Exception e) {
+            return "Error occurred while extracting user ID from JWT token: " + e.getMessage();
         }
     }
 
@@ -100,6 +119,7 @@ public class JwtService {
 
         String token = Jwts
                 .builder().subject(user.getUsername())
+                .claim("userid",user.getId())
                 .issuedAt(new Date(currentTimeMillis))
                 .expiration(new Date(currentTimeMillis + expirationTimeMillis))
                 .signWith(getSigninKey())

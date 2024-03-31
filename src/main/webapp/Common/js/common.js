@@ -180,8 +180,11 @@ function getHeaders(method) {
     if (method == "POST" || method == "post" || method == "delete" || method == "DELETE" || method == "PUT" || method == "put") {
         headers["Connection-Type"] = "_write"
     }
+    let jwttoken = localStorage.getItem("token");
 
-    //headers["Authorization"] = "Bearer " + $("#access_token_rest").val();
+    if(jwttoken!= null && jwttoken != ""){
+        headers["Authorization"] = "Bearer " + jwttoken;
+    }
     return headers;
 }
 

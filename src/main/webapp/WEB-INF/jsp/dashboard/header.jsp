@@ -11,5 +11,8 @@
     <link rel="stylesheet" href="/Common/css/jquery.toast.css">
     <link rel="stylesheet" href="/Common/css/common.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
 
 </head>

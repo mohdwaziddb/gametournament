@@ -1,14 +1,16 @@
 package com.game.tournament.gametournament.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.game.tournament.gametournament.model.Games;
-import com.game.tournament.gametournament.model.TournamentPrice;
-import com.game.tournament.gametournament.model.Tournaments;
-import com.game.tournament.gametournament.repository.GameRepo;
-import com.game.tournament.gametournament.repository.TournamentPriceRepo;
-import com.game.tournament.gametournament.repository.TournamentRepo;
+import com.game.tournament.gametournament.model.*;
+import com.game.tournament.gametournament.repository.*;
 import com.game.tournament.gametournament.utils.DataTypeUtility;
 import com.game.tournament.gametournament.utils.MobileResponseDTOFactory;
+import com.razorpay.Order;
+import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
+import jakarta.servlet.http.HttpServletRequest;
+import netscape.javascript.JSObject;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,10 @@ import java.util.*;
 @Service
 public class GameService {
 
+    private static String Key = "rzp_test_x2FdmAMnovVzvG";
+    private static String Key_Secret = "4t7mqBhnN3X2Ronlgc59Ql8Q";
+    private static String Currecny = "INR";
+
     @Autowired
     private GameRepo gameRepo;
 
@@ -36,6 +42,12 @@ public class GameService {
 
     @Autowired
     private TournamentRepo tournamentRepo;
+
+    @Autowired
+    private PlayerRepo playerRepo;
+
+    @Autowired
+    private UserRepository userRepository;
 
 
     @Transactional
@@ -166,6 +178,7 @@ public class GameService {
         Long minimum_player = DataTypeUtility.longValue(param.get("minimum_player"));
         Long maximum_player = DataTypeUtility.longValue(param.get("maximum_player"));
         String secret_code = DataTypeUtility.stringValue(param.get("secret_code"));
+        Boolean is_completed = DataTypeUtility.booleanValue(param.get("is_completed"));
         boolean isStartTimeBeforeEndTime = false;
         if(starttime != null && !starttime.equals("") && endtime != null && !endtime.equals("")) {
             isStartTimeBeforeEndTime = compareTimes(starttime, endtime);
@@ -228,19 +241,26 @@ public class GameService {
             boolean present = tournamentRepo.findById(id).isPresent();
             if(present){
                 Tournaments tournaments = tournamentRepo.findById(id).get();
-                tournaments.setName(name);
-                tournaments.setPriceid(price);
-                tournaments.setGameid(game);
-                tournaments.setDescription(description);
-                tournaments.setDate(date);
-                tournaments.setAttachment(imageDataJson);
-                tournaments.setStarttime(starttime);
-                tournaments.setEndtime(endtime);
-                tournaments.setMinimumplayer(minimum_player);
-                tournaments.setMaximumplayer(maximum_player);
-                tournaments.setSecretcode(secret_code);
-                tournamentRepo.save(tournaments);
-                return mobileResponseDTOFactory.successMessage("Successfully Save");
+                Boolean isdeleted = tournaments.getIsdeleted();
+                Boolean iscompleted = tournaments.getIscompleted();
+                if(isdeleted==null || !isdeleted){
+                    if(iscompleted==null || !iscompleted){
+                    tournaments.setName(name);
+                    tournaments.setPriceid(price);
+                    tournaments.setGameid(game);
+                    tournaments.setDescription(description);
+                    tournaments.setDate(date);
+                    tournaments.setAttachment(imageDataJson);
+                    tournaments.setStarttime(starttime);
+                    tournaments.setEndtime(endtime);
+                    tournaments.setMinimumplayer(minimum_player);
+                    tournaments.setMaximumplayer(maximum_player);
+                    tournaments.setSecretcode(secret_code);
+                    tournaments.setIscompleted(is_completed);
+                    tournamentRepo.save(tournaments);
+                    return mobileResponseDTOFactory.successMessage("Successfully Save");
+                    }
+                }
             }
         } else {
             Tournaments tournaments = new Tournaments();
@@ -255,6 +275,7 @@ public class GameService {
             tournaments.setMinimumplayer(minimum_player);
             tournaments.setMaximumplayer(maximum_player);
             tournaments.setSecretcode(secret_code);
+            tournaments.setIscompleted(is_completed);
             tournaments.setCreatedon(DataTypeUtility.getCurrentDateTimeInIndianFormatUI());
             tournamentRepo.save(tournaments);
             return mobileResponseDTOFactory.successMessage("Successfully Save");
@@ -274,8 +295,11 @@ public class GameService {
             if(present){
                 Tournaments tournaments = tournamentRepo.findById(id).get();
                 Boolean isdeleted = tournaments.getIsdeleted();
+                Boolean iscompleted = tournaments.getIscompleted();
                 if(isdeleted==null || !isdeleted){
-                    resultMap.put("tournament",tournaments);
+                    if(iscompleted==null || !iscompleted) {
+                        resultMap.put("tournament", tournaments);
+                    }
                 }
             }
         } else {
@@ -286,10 +310,12 @@ public class GameService {
                     Map<String,Object> tournament_map = new HashMap<>();
                     Long id1 = tournaments.getId();
                     String name = tournaments.getName();
+                    Boolean iscompleted = tournaments.getIscompleted();
                     String price = DataTypeUtility.stringValue(price_map.get(tournaments.getPriceid()));
                     tournament_map.put("id",id1);
                     tournament_map.put("name",name);
                     tournament_map.put("price",price);
+                    tournament_map.put("iscompleted",iscompleted);
                     tournament_list_new.add(tournament_map);
                 }
             }
@@ -360,33 +386,156 @@ public class GameService {
         return !date.before(currentDate) && !date.after(tomorrowDate);
     }
 
-    public Object getTournamentsForUser(Map<String,Object> param) throws NoSuchFieldException, IllegalAccessException {
+    public Object getTournamentsForUser(Map<String,Object> param, HttpServletRequest request) throws NoSuchFieldException, IllegalAccessException {
         Map<String,Object> resultMap = new HashMap<>();
-        List<Tournaments> tournamentsList = tournamentRepo.getTournaments();
-        List<Map<String ,Object>> tournament_list = new ArrayList<>();
+        Long id = DataTypeUtility.longValue(param.get("id"));
         Map<Long, Object> price_map = DataTypeUtility.getIdFieldMap(tournamentPriceRepo, "price");
         Map<Long, Object> game_map = DataTypeUtility.getIdFieldMap(gameRepo, "name");
-        if(tournamentsList != null && tournamentsList.size()>0){
-            for (Tournaments obj : tournamentsList) {
-                Map<String,Object> tournament_map = new HashMap<>();
-                tournament_map.put("name",obj.getName());
-                tournament_map.put("date",obj.getDate());
-                tournament_map.put("description",obj.getDescription());
-                tournament_map.put("endtime",obj.getEndtime());
-                tournament_map.put("maximumplayer",obj.getMaximumplayer());
-                tournament_map.put("minimumplayer",obj.getMinimumplayer());
-                tournament_map.put("starttime",obj.getStarttime());
-                tournament_map.put("secretcode",obj.getSecretcode());
-                tournament_map.put("id",obj.getId());
-                tournament_map.put("attachment",obj.getAttachment());
-                tournament_map.put("price",price_map.get(obj.getPriceid()));
-                tournament_map.put("game",game_map.get(obj.getGameid()));
+        Long currentUserId = mobileResponseDTOFactory.getCurrentUserId(request);
 
-                tournament_list.add(tournament_map);
+        List<Players> all_join_tournament_list_byuserid = playerRepo.findAllByUserid(currentUserId);
+        HashSet<Long> join_tournament_set = new HashSet<>();
+        if(all_join_tournament_list_byuserid != null && all_join_tournament_list_byuserid.size()>0){
+            for (Players obj : all_join_tournament_list_byuserid) {
+                join_tournament_set.add(obj.getTounamentid());
             }
         }
 
-        resultMap.put("list",tournament_list);
+        if(id != null && id>0){
+            boolean present = tournamentRepo.findById(id).isPresent();
+            if(present){
+                Tournaments tournaments = tournamentRepo.findById(id).get();
+                Boolean isdeleted = tournaments.getIsdeleted();
+                Boolean iscompleted = tournaments.getIscompleted();
+                if(isdeleted==null || !isdeleted){
+                    if(iscompleted==null || !iscompleted){
+                        Long gameid = tournaments.getGameid();
+                        Long priceid = tournaments.getPriceid();
+                        Long id1 = tournaments.getId();
+                        if(join_tournament_set.contains(id1)){
+                            tournaments.setIsjoin(true);
+                        } else {
+                            tournaments.setIsjoin(false);
+                        }
+                        tournaments.setPrice(DataTypeUtility.stringValue(price_map.get(priceid)));
+                        tournaments.setGame(DataTypeUtility.stringValue(game_map.get(gameid)));
+                        resultMap.put("tournament",tournaments);
+                    }
+                }
+            }
+        } else {
+            List<Tournaments> tournamentsList = tournamentRepo.getTournaments();
+            List<Map<String ,Object>> tournament_list = new ArrayList<>();
+            if(tournamentsList != null && tournamentsList.size()>0){
+                for (Tournaments obj : tournamentsList) {
+                    Map<String,Object> tournament_map = new HashMap<>();
+                    Long objId = obj.getId();
+                    tournament_map.put("name",obj.getName());
+                    tournament_map.put("date",obj.getDate());
+                    tournament_map.put("description",obj.getDescription());
+                    tournament_map.put("endtime",obj.getEndtime());
+                    tournament_map.put("maximumplayer",obj.getMaximumplayer());
+                    tournament_map.put("minimumplayer",obj.getMinimumplayer());
+                    tournament_map.put("starttime",obj.getStarttime());
+                    tournament_map.put("secretcode",obj.getSecretcode());
+                    tournament_map.put("id",objId);
+                    tournament_map.put("attachment",obj.getAttachment());
+                    tournament_map.put("price",price_map.get(obj.getPriceid()));
+                    tournament_map.put("game",game_map.get(obj.getGameid()));
+                    if(join_tournament_set.contains(objId)){
+                        tournament_map.put("isjoin",true);
+                    } else {
+                        tournament_map.put("isjoin", false);
+                    }
+
+
+
+                    tournament_list.add(tournament_map);
+                }
+            }
+
+            resultMap.put("list",tournament_list);
+        }
+
+        return resultMap;
+    }
+
+    @Transactional
+    public ResponseEntity<?> joiningTournament(Map<String , Object> param, HttpServletRequest request){
+        Long id = DataTypeUtility.longValue(param.get("id"));
+        String transactionid = DataTypeUtility.stringValue(param.get("transactionid"));
+        Long currentUserId = mobileResponseDTOFactory.getCurrentUserId(request);
+        String currentDateTimeInIndianFormat = DataTypeUtility.getCurrentDateTimeInIndianFormatUI();
+
+        Players players = new Players();
+        players.setTounamentid(id);
+        players.setUserid(currentUserId);
+        players.setCreatedon(currentDateTimeInIndianFormat);
+        players.setTransactionid(transactionid);
+        playerRepo.save(players);
+        return mobileResponseDTOFactory.successMessage("Successfully Save");
+
+    }
+
+    public Object createTransaction(Map<String ,Object> param) {
+        Double amount = DataTypeUtility.doubleZeroValue(param.get("amount"));
+        try {
+            JSONObject orderRequest = new JSONObject();
+            orderRequest.put("amount", amount * 100);
+            orderRequest.put("currency", Currecny);
+
+            RazorpayClient razorpayClient = new RazorpayClient(Key,Key_Secret);
+            Order order = razorpayClient.orders.create(orderRequest);
+            TransactionalDetails transactionalDetails = prepareTransactionalDetails(order);
+            return transactionalDetails;
+        } catch (Exception e){
+            System.out.println(e.getMessage());;
+            return null;
+        }
+    }
+
+    private TransactionalDetails prepareTransactionalDetails(Order order){
+        String orderid = DataTypeUtility.stringValue(order.get("id"));
+        String currency = DataTypeUtility.stringValue(order.get("currency"));
+        Integer amount = DataTypeUtility.integerValue(order.get("amount"));
+
+        TransactionalDetails transactionalDetails = new TransactionalDetails(orderid,amount,currency,Key,Key_Secret);
+        return transactionalDetails;
+    }
+
+    public Object getPlayerDetails(Map<String,Object> param, HttpServletRequest request) throws Exception {
+        Map<String,Object> resultMap = new HashMap<>();
+        List<Players> list = playerRepo.findAllByOrderByIdDesc();
+        List<Tournaments> tournament_list = tournamentRepo.findAllByIsdeletedIsFalseOrIsdeletedIsNullOrderByIdDesc();
+        Map<Long,Tournaments> player_map = new HashMap<>();
+        if(tournament_list!=null && tournament_list.size()>0){
+            for (Tournaments modal : tournament_list) {
+                player_map.put(modal.getId(),modal);
+            }
+        }
+
+        Map<Long, Object> username_map = DataTypeUtility.getIdFieldMap(userRepository, "username");
+        Map<Long, Object> price_map = DataTypeUtility.getIdFieldMap(tournamentPriceRepo, "price");
+        Map<Long, Object> game_map = DataTypeUtility.getIdFieldMap(gameRepo, "name");
+
+        List<Map<String,Object>> new_list = new ArrayList<>();
+        if(list!= null && list.size()>0){
+            for (Players obj : list) {
+                Map<String,Object> map = new HashMap<>();
+                Long userid = obj.getUserid();
+                Long tounamentid = obj.getTounamentid();
+                Long priceid = player_map.get(tounamentid).getPriceid();
+                Long gameid = player_map.get(tounamentid).getGameid();
+
+                map.put("name",username_map.get(userid));
+                map.put("game",game_map.get(gameid));
+                map.put("amount",price_map.get(priceid));
+                map.put("tournament",player_map.get(tounamentid).getName());
+                new_list.add(map);
+            }
+        }
+
+        resultMap.put("list",new_list);
         return resultMap;
     }
 

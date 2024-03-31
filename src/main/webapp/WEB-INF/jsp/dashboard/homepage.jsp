@@ -50,6 +50,17 @@
                         let starttime = tournamentListElement.starttime;
                         let secretcode = tournamentListElement.secretcode;
                         let game = tournamentListElement.game;
+                        let isjoin = tournamentListElement.isjoin;
+
+                        let isjoin_data = "";
+                        if(isjoin){
+                            isjoin_data += '<button style="background: #7b7d7c" class="join-btn">Already Joined</button>' +
+                                '<button style="background-color: blue;" class="join-btn" onclick="moreDetailsButClick('+id+')">More Details</button>'
+                        } else {
+                            isjoin_data += '<button class="join-btn" onclick="joinButCLick('+id+','+price+')">Join Game (Rs. '+price+')</button>' +
+                                            '<button style="background-color: blue;" class="join-btn" onclick="moreDetailsButClick('+id+')">More Details</button>'
+                        }
+
                         tabledate += '<div class="container">'
                             +'<div class="card">'
                             +'<img src="https://www.w3schools.com/w3images/hamburger.jpg" alt="Image 1">'
@@ -60,8 +71,7 @@
                             +'<p>Start Time: '+starttime+'</p>'
                             +'<p>End Time: '+endtime+'</p>'
                             +'<div>' +
-                            '<button class="join-btn" onclick="joinButCLick('+id+')">Join Game</button>' +
-                            '<button style="background-color: blue;" class="join-btn" onclick="moreDetailsButClick('+id+')">More Details</button>' +
+                            isjoin_data+
                             '</div>'
                             +'</div>'
                             +'</div>'
@@ -79,12 +89,128 @@
         });
     }
 
-    function joinButCLick(id){
-        console.log(id)
+    function joinButCLick(tournamentid,price){
+        let domain = getDomain() + "/rest/game/createtransaction";
+        let data = {
+            "amount": price,
+        }
+        $.ajax({
+            type: "GET",
+            url: domain,
+            contentType: 'application/json',
+            headers: getHeaders("GET"),
+            data: data,
+            success: function (response) {
+                let
+                    = {
+                    "order_id": response.orderid,
+                    "currency": response.currency,
+                    "amount": response.amount,
+                    "key": response.key,
+                    "name": "Tech Parichay",
+                    "description": "Tech Parichay -- Tech that you love",
+                    "handler": function(handleresponse) {
+                        let razorpay_order_id = valuecheck(handleresponse.razorpay_order_id);
+                        let razorpay_payment_id = valuecheck(handleresponse.razorpay_payment_id);
+                        let razorpay_signature = valuecheck(handleresponse.razorpay_signature);
+                        let key_secret = valuecheck(response.key_secret);
+                        let orderid = valuecheck(response.orderid);
+
+                        //let generatedSignature = CryptoJS.HmacSHA256(razorpay_order_id + "|" + razorpay_payment_id, key).toString(CryptoJS.enc.Hex);
+                        let data = orderid + "|" + razorpay_payment_id;
+                        let generatedSignature = CryptoJS.HmacSHA256(data, key_secret).toString(CryptoJS.enc.Hex);
+
+                        if (generatedSignature != razorpay_signature) {
+                            showValidationMessage("ERROR", "error", "Transaction is not valid");
+                        } else {
+                            let validresp = {
+                                "message":"Transaction Completed",
+                                "success":true,
+                                "tournamentid":tournamentid,
+                                "transactionid":razorpay_payment_id,
+                            }
+                            handlePaymentValidation(validresp);
+                        }
+
+                        //console.log(response);
+                    },
+                    "theme": {
+                        "color": "#444"
+                    },
+                    "prefill": {
+                        "name": "Mohd Wazid",
+                        "email": "mohd.wazid.db@gmail.com",
+                        "contact": "8130703196",
+                    }
+                };
+                var razorpayObject = new Razorpay(options);
+                razorpayObject.open();
+                razorpayObject.on('payment.failed', function (response){
+                    showValidationMessage("ERROR", "error", response.error.description);
+                    console.log(response.error.code);
+                    console.log(response.error.description);
+                    console.log(response.error.source);
+                    console.log(response.error.step);
+                    console.log(response.error.reason);
+                    console.log(response.error.metadata.order_id);
+                    console.log(response.error.metadata.payment_id);
+                });
+                /*document.getElementById('rzp-button1').onclick = function(e){
+                    rzp1.open();
+                    e.preventDefault();
+                }*/
+                //e.preventDefault();
+                //console.log()
+            }, error: function (error) {
+                if(!error.responseJSON.success){
+                    showValidationMessage("ERROR", "error", error.responseJSON.message);
+                }
+            }
+        });
+    }
+
+    function handlePaymentValidation(response){
+        if(response.success){
+            let tournamentid = response.tournamentid;
+            let transactionid = response.transactionid;
+            joinButCLick1(tournamentid,transactionid);
+
+        }
+        //console.log(response);
+    }
+
+
+    function joinButCLick1(id,transactionid){
+        //console.log(id);
+        let domain = getDomain() + "/rest/game/joining_tournament";
+        let data = {
+            "id": id,
+            "transactionid": transactionid,
+        }
+        $.ajax({
+            type: "POST",
+            url: domain,
+            contentType: 'application/json',
+            headers: getHeaders("POST"),
+            data: JSON.stringify(data),
+            success: function (response) {
+                if(response.success){
+                    showValidationMessage("Success", "success", "Tournament Joined");
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                }
+            }, error: function (error) {
+                if(!error.responseJSON.success){
+                    showValidationMessage("ERROR", "error", error.responseJSON.message);
+                }
+
+            }
+        });
     }
 
     function moreDetailsButClick(id){
-        console.log(id)
+        window.location.href="/game/tournament?id="+id
     }
 
 

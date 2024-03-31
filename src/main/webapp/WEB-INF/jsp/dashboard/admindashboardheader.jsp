@@ -70,7 +70,7 @@
       background-color: #ffffff;
     }
     .action-buttons {
-      display: flex;
+      /*display: flex;*/
       justify-content: space-around;
     }
     .edit-btn, .delete-btn, .add-btn {

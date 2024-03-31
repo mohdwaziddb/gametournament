@@ -91,12 +91,13 @@
     <input type="number" id="tournament_min_player" name="tournament_min_player"><br>
     <label for="tournament_max_player">Max Player:</label><br>
     <input type="number" id="tournament_max_player" name="tournament_max_player"><br>
-
-
     <%--<input type="file" id="tournament_image" name="tournament_image"><br>--%>
 
     <label for="tournament_secret_code">Secret Code:</label><br><br>
-    <textarea class="textAreaCss" type="text" id="tournament_secret_code" name="tournament_secret_code"></textarea><br>
+    <textarea class="textAreaCss" type="text" id="tournament_secret_code" name="tournament_secret_code"></textarea><br><br>
+
+    <label for="is_completed">Is Tournament Completed: </label>
+    <input type="checkbox" id="is_completed" name="is_completed"><br>
 
 
     <button type="button" onclick="saveTournament()">Save</button>
@@ -149,6 +150,7 @@
         let minimumplayer1 = valuecheck(tournament.minimumplayer);
         let secretcode1 = valuecheck(tournament.secretcode);
         let starttime1 = valuecheck(tournament.starttime);
+        let is_completed = valuecheck(tournament.iscompleted);
 
         $('#tournament_name').val(name1);
         $('#tournament_description').val(description1);
@@ -158,6 +160,9 @@
         $('#tournament_min_player').val(minimumplayer1);
         $('#tournament_max_player').val(maximumplayer1);
         $('#tournament_secret_code').val(secretcode1);
+        if(is_completed){
+          $('#is_completed').prop('checked',true);
+        }
 
         let data1 = "<option>Select Game</option>";
         if(gameList != null){
@@ -254,6 +259,8 @@
       return showValidationMessage("ERROR", "error", "Maximum Player cannot be blank");
     }
 
+    let is_completed = $('#is_completed').prop('checked');
+
 
     let domain = getDomain() + "/rest/game/createtournament";
 
@@ -270,6 +277,7 @@
     formData.append('minimum_player', tournament_min_player);
     formData.append('maximum_player', tournament_max_player);
     formData.append('secret_code', tournament_secret_code);
+    formData.append('is_completed', is_completed);
 
     /*let data = {
       "name":tournament_name,

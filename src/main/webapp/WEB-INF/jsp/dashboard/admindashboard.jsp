@@ -28,11 +28,11 @@
             <i class="fas fa-cogs"></i>
             <p>Create Tournament</p>
         </div>
-        <div class="box" onclick="window.location.href='/mvc/creategame'">
+        <div class="box" onclick="window.location.href='/mvc/runningtournament'">
             <i class="fas fa-cogs"></i>
             <p>Running Tournament</p>
         </div>
-        <div class="box" onclick="window.location.href='/mvc/creategame'">
+        <div class="box" onclick="window.location.href='/mvc/paymenthistory'">
             <i class="fas fa-money-bill-wave"></i>
             <p>Payment History</p>
         </div>

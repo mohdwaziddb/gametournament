@@ -13,4 +13,9 @@ public class GameMVCController {
         return "dashboard/homepage";
     }
 
+    @RequestMapping(value = "/tournament",method = {RequestMethod.GET,RequestMethod.POST})
+    public String tournament(){
+        return "dashboard/tournament";
+    }
+
 }

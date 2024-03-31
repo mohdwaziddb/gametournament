@@ -35,7 +35,8 @@ public class JwtService {
         try {
             return extractClaim(token, Claims::getSubject);
         } catch (Exception e){
-            return "JWT Token Expire";
+            //return "JWT Token Expire";
+            return null;
         }
     }
 
@@ -60,6 +61,9 @@ public class JwtService {
 
     public boolean isValid(String token, UserDetails user) {
         String username = extractUsername(token);
+        if(username==null || username.equals("")){
+            return false;
+        }
 
         boolean validToken = tokenRepository
                 .findByToken(token)
@@ -80,7 +84,8 @@ public class JwtService {
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         Claims claims = extractAllClaims(token);
         if(claims==null){
-            return (T) mobileResponseDTOFactory.failedMessage("JWT Token Expire");
+            //return (T) mobileResponseDTOFactory.failedMessage("JWT Token Expire");
+            return null;
         }
         return resolver.apply(claims);
     }
@@ -113,8 +118,8 @@ public class JwtService {
 //        return token;
 //    }
     public String generateToken(Users user) {
-        //long expirationTimeMillis = 30 * 60 * 1000; // 30 minutes in milliseconds
-        long expirationTimeMillis = 24*60*60*1000; // 24 hour in milliseconds
+        long expirationTimeMillis = 2 * 60 * 1000; // 30 minutes in milliseconds
+        //long expirationTimeMillis = 24*60*60*1000; // 24 hour in milliseconds
         long currentTimeMillis = System.currentTimeMillis();
 
         String token = Jwts

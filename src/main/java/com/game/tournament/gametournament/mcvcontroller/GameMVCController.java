@@ -18,4 +18,9 @@ public class GameMVCController {
         return "dashboard/tournament";
     }
 
+    @RequestMapping(value = "/userprofile",method = {RequestMethod.GET,RequestMethod.POST})
+    public String userprofile(){
+        return "dashboard/editprofile";
+    }
+
 }

@@ -220,6 +220,9 @@
 
 </script>
 
+
+
 <%@ include file="/WEB-INF/jsp/dashboard/footer.jsp"%>
+<%@ include file="/WEB-INF/jsp/dashboard/userviewslider.jsp"%>
 </body>
 </html>

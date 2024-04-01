@@ -7,18 +7,14 @@ import com.game.tournament.gametournament.utils.DataTypeUtility;
 import com.game.tournament.gametournament.utils.MobileResponseDTOFactory;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
-import com.razorpay.RazorpayException;
 import jakarta.servlet.http.HttpServletRequest;
-import netscape.javascript.JSObject;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -549,5 +545,48 @@ public class GameService {
         resultMap.put("list",new_list);
         return resultMap;
     }
+
+    public Object getUserDetailsById(Map<String,Object> param, HttpServletRequest request) throws Exception {
+        HashMap<String ,Object> resultMap = new HashMap<>();
+        String username = DataTypeUtility.stringValue(param.get("username"));
+        String currentUserName = mobileResponseDTOFactory.getCurrentUserName(request);
+        boolean usernamematch = username.equalsIgnoreCase(currentUserName);
+        if(usernamematch){
+            boolean byUsername = userRepository.findByUsername(username).isPresent();
+            if(byUsername) {
+                Users users = userRepository.findByUsername(username).get();
+                resultMap.put("userdetail", users);
+            }
+        }
+        return resultMap;
+    }
+
+    @Transactional
+    public ResponseEntity<?> saveUserDetailsById(Map<String , Object> param,HttpServletRequest request){
+        String username = DataTypeUtility.stringValue(param.get("username"));
+        String firstname = DataTypeUtility.stringValue(param.get("firstname"));
+        String lastname = DataTypeUtility.stringValue(param.get("lastname"));
+        String emailid = DataTypeUtility.stringValue(param.get("emailid"));
+        Long phoneno = DataTypeUtility.longValue(param.get("phoneno"));
+        String currentUserName = mobileResponseDTOFactory.getCurrentUserName(request);
+        boolean usernamematch = username.equalsIgnoreCase(currentUserName);
+        if(usernamematch){
+            boolean byUsername = userRepository.findByUsername(username).isPresent();
+            if(byUsername){
+                Users usermodal = userRepository.findByUsername(username).get();
+                usermodal.setFirstname(firstname);
+                usermodal.setLastname(lastname);
+                usermodal.setEmailid(emailid);
+                usermodal.setMobileno(phoneno);
+                userRepository.save(usermodal);
+                mobileResponseDTOFactory.successMessage("Profile Update Successfully");
+            }
+        }
+
+        return mobileResponseDTOFactory.failedMessage("Cannot Save");
+
+    }
+
+
 
 }

@@ -146,6 +146,24 @@ public class GameRestController {
         }
     }
 
+    @GetMapping("/getuserdetailsbyid")
+    public Object getUserDetailsById(@RequestParam Map<String, Object> param, HttpServletRequest request) {
+        try {
+            return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getUserDetailsById(param,request)), HttpStatus.OK);
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
+
+    @PostMapping("/saveuserdetailsbyid")
+    public ResponseEntity<?> saveUserDetailsById(@RequestBody Map<String, Object> param, HttpServletRequest request) {
+        try {
+            return gameService.saveUserDetailsById(param,request);
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
+
 
 
 

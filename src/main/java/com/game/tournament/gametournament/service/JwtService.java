@@ -118,8 +118,8 @@ public class JwtService {
 //        return token;
 //    }
     public String generateToken(Users user) {
-        long expirationTimeMillis = 2 * 60 * 1000; // 30 minutes in milliseconds
-        //long expirationTimeMillis = 24*60*60*1000; // 24 hour in milliseconds
+        //long expirationTimeMillis = 2 * 60 * 1000; // 30 minutes in milliseconds
+        long expirationTimeMillis = 24*60*60*1000; // 24 hour in milliseconds
         long currentTimeMillis = System.currentTimeMillis();
 
         String token = Jwts

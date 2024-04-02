@@ -36,9 +36,9 @@
             <i class="fas fa-money-bill-wave"></i>
             <p>Payment History</p>
         </div>
-        <div class="box" onclick="window.location.href='/mvc/creategame'">
+        <div class="box" onclick="window.location.href='/mvc/addtournamentwinner'">
             <i class="fas fa-cogs"></i>
-            <p>Other</p>
+            <p>Add Tournament Winner</p>
         </div>
     </div>
 </div>

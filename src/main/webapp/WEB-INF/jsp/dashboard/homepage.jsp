@@ -33,8 +33,10 @@
             data: data,
             success: function (response) {
                 let tournament_list = response.data.list;
+                let userid = response.data.userid;
                 let tabledate = "";
                 let srno=1;
+                $('#userid').val(userid);
                 if(tournament_list != null && tournament_list.length>0){
                     for (let data in tournament_list) {
                         let tournamentListElement = tournament_list[data];
@@ -188,6 +190,7 @@
         let data = {
             "id": id,
             "transactionid": transactionid,
+            "userid": $('#userid').val(),
         }
         $.ajax({
             type: "POST",

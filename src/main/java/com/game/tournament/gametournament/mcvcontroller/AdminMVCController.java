@@ -45,4 +45,9 @@ public class AdminMVCController {
         return "dashboard/paymenthistory";
     }
 
+    @RequestMapping(value = "/addtournamentwinner",method = {RequestMethod.GET,RequestMethod.POST})
+    public String addTournamentWinner(){
+        return "dashboard/addtournamentwinner";
+    }
+
 }

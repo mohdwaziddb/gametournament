@@ -246,6 +246,7 @@ public class GameService {
                     tournaments.setGameid(game);
                     tournaments.setDescription(description);
                     tournaments.setDate(date);
+                    //tournaments.setAttachment(file.getBytes());
                     tournaments.setAttachment(imageDataJson);
                     tournaments.setStarttime(starttime);
                     tournaments.setEndtime(endtime);
@@ -435,6 +436,7 @@ public class GameService {
                     tournament_map.put("starttime",obj.getStarttime());
                     tournament_map.put("secretcode",obj.getSecretcode());
                     tournament_map.put("id",objId);
+                    //byte[] attachment = obj.getAttachment();
                     tournament_map.put("attachment",obj.getAttachment());
                     tournament_map.put("price",price_map.get(obj.getPriceid()));
                     tournament_map.put("game",game_map.get(obj.getGameid()));
@@ -451,6 +453,7 @@ public class GameService {
             }
 
             resultMap.put("list",tournament_list);
+            resultMap.put("userid",currentUserId);
         }
 
         return resultMap;
@@ -460,12 +463,16 @@ public class GameService {
     public ResponseEntity<?> joiningTournament(Map<String , Object> param, HttpServletRequest request){
         Long id = DataTypeUtility.longValue(param.get("id"));
         String transactionid = DataTypeUtility.stringValue(param.get("transactionid"));
+        Long userid = DataTypeUtility.longValue(param.get("userid"));
         Long currentUserId = mobileResponseDTOFactory.getCurrentUserId(request);
         String currentDateTimeInIndianFormat = DataTypeUtility.getCurrentDateTimeInIndianFormatUI();
 
+
         Players players = new Players();
         players.setTounamentid(id);
-        players.setUserid(currentUserId);
+        if(userid.equals(currentUserId)){
+            players.setUserid(currentUserId);
+        }
         players.setCreatedon(currentDateTimeInIndianFormat);
         players.setTransactionid(transactionid);
         playerRepo.save(players);
@@ -550,14 +557,14 @@ public class GameService {
         HashMap<String ,Object> resultMap = new HashMap<>();
         String username = DataTypeUtility.stringValue(param.get("username"));
         String currentUserName = mobileResponseDTOFactory.getCurrentUserName(request);
-        boolean usernamematch = username.equalsIgnoreCase(currentUserName);
+        /*boolean usernamematch = username.equalsIgnoreCase(currentUserName);
         if(usernamematch){
-            boolean byUsername = userRepository.findByUsername(username).isPresent();
-            if(byUsername) {
+            List<Users> allByUsername = userRepository.findAllByUsername(username);
+            if(allByUsername != null && allByUsername.size()>0) {
                 Users users = userRepository.findByUsername(username).get();
                 resultMap.put("userdetail", users);
             }
-        }
+        }*/
         return resultMap;
     }
 

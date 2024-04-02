@@ -38,6 +38,8 @@ public class Tournaments {
     private String createdon;
 
     private String attachment;
+//    @Lob
+//    private byte[] attachment;
 
     private Long gameid;
 

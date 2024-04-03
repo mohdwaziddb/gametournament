@@ -227,7 +227,7 @@ public class AuthenticationService {
                     if (!loggedOut) {
                         boolean valid = jwtService.isValid(token, users);
                         if (valid) {
-                            return mobileResponseDTOFactory.successMessage("Successfully Matched");
+                                return mobileResponseDTOFactory.successMessage("Successfully Matched");
                         } else {
                             return mobileResponseDTOFactory.failedMessage("JWT Token Expire");
                         }

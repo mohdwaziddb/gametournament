@@ -215,10 +215,10 @@ function localStorageUsernameAndTokenValidation(){
             //console.log("Welcome");
             if(error.responseJSON.message === "JWT Token Expire"){
 
-                if(window.location.pathname != "/login"){
-                    showValidationMessage("ERROR", "error", "Token Expire - Login Again");
+                if(window.location.pathname != "/login" && window.location.pathname != "/forgetpassword"){
+                    showValidationMessage("ERROR", "error", "Kindly Login Again");
                     setTimeout(function () {
-                    window.location.href="/login";
+                    //window.location.href="/login";
                     }, 1500);
                 }
                 /*if(window.location.pathname == "/login"){

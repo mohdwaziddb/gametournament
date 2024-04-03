@@ -41,7 +41,7 @@
   <div id="profile-form" class="form-container">
     <div class="form-row">
       <label for="name" class="form-label">Username:</label>
-      <input disabled type="text" id="name" class="form-input">
+      <input disabled type="text" id="name" class="form-input" style="background: #f75959; color: white; font-weight: 600;">
     </div>
     <div class="form-row">
       <label for="firstname" class="form-label">First Name:</label>
@@ -68,32 +68,30 @@
 
 <script>
 
+  var urlSearchParams = new URLSearchParams(window.location.search);
+  /*for(var [key,value] in urlSearchParams){
+      console.log(key);
+      console.log(value);
+      console.log(key);
+  }*/
+  var encryptedData = urlSearchParams.get('__code__');
+  var decodedData = atob(encryptedData);
+
+  let decorderdate_split = decodedData.split("&");
+  var storing_decordeddata_obj = {};
+  for(var i in decorderdate_split){
+    let key_value_both = decorderdate_split[i].split("=");
+    let key = key_value_both[0];
+    let value = key_value_both[1];
+    storing_decordeddata_obj[key]=value;
+  }
+
+  var userid = storing_decordeddata_obj.userid;
+
 
   $(document).ready(function () {
-
-    var urlSearchParams = new URLSearchParams(window.location.search);
-    /*for(var [key,value] in urlSearchParams){
-        console.log(key);
-        console.log(value);
-        console.log(key);
-    }*/
-    var encryptedData = urlSearchParams.get('__code__');
-    var decodedData = atob(encryptedData);
-
-    let decorderdate_split = decodedData.split("&");
-    var storing_decordeddata_obj = {};
-    for(var i in decorderdate_split){
-      let key_value_both = decorderdate_split[i].split("=");
-      let key = key_value_both[0];
-      let value = key_value_both[1];
-      storing_decordeddata_obj[key]=value;
-    }
-
-    var userid = storing_decordeddata_obj.userid;
-
-
-
-    onloadMethod();
+    onloadMethod(userid);
+    $('#userid').val(userid);
   });
 
   function saveUserData(){
@@ -120,6 +118,7 @@
     }
 
     let data = {
+      "userid":userid,
       "username":username,
       "firstname":firstname,
       "lastname":lastname,
@@ -134,11 +133,16 @@
       url: domain,
       contentType: 'application/json',
       headers: getHeaders("POST"),
-      data: data,
+      data: JSON.stringify(data),
       success: function (response) {
         //console.log(response);
         if(response.success){
-          window.location.reload();
+          showValidationMessage("Success", "success", response.message);
+          setTimeout(function () {
+            //window.location.reload();
+            window.location.reload();
+          }, 2000);
+
         }
 
       }, error: function (error) {
@@ -152,11 +156,12 @@
   }
 
 
-  function onloadMethod(){
+  function onloadMethod(id){
     let domain = getDomain() + "/rest/game/getuserdetailsbyid";
 
     let data = {
-      "username":localStorage.getItem("username")
+      //"username":localStorage.getItem("username"),
+      "userid":id
     }
 
     $.ajax({
@@ -166,7 +171,18 @@
       headers: getHeaders("GET"),
       data: data,
       success: function (response) {
-        let userdetail_object = response.data.userdetail;
+        let firstname = valuecheck(response.firstname);
+        let lastname = valuecheck(response.lastname);
+        let mobileno = valuecheck(response.mobileno);
+        let emailid = valuecheck(response.emailid);
+        let username = valuecheck(response.username);
+
+        $('#name').val(username);
+        $('#firstname').val(firstname);
+        $('#lastname').val(lastname);
+        $('#email').val(emailid);
+        $('#phone').val(mobileno);
+
 
 
 

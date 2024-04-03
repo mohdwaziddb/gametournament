@@ -264,6 +264,49 @@ function showAdminDashboardProfile(){
     });
 }
 
+function logoutProfile(){
+/*    var urlSearchParams = new URLSearchParams(window.location.search);
+    var encryptedData = urlSearchParams.get('__code__');
+    var decodedData = atob(encryptedData);
+
+    let decorderdate_split = decodedData.split("&");
+    var storing_decordeddata_obj = {};
+    for(var i in decorderdate_split){
+        let key_value_both = decorderdate_split[i].split("=");
+        let key = key_value_both[0];
+        let value = key_value_both[1];
+        storing_decordeddata_obj[key]=value;
+    }
+    var userid = storing_decordeddata_obj.userid;*/
+    var userid = $('#userid').val();
+
+    let data = {
+        'userid':userid,
+    };
+    let domain = getDomain() + "/rest/authentication/logout";
+    $.ajax({
+        type: "POST",
+        url: domain,
+        contentType: 'application/json',
+        headers: getHeaders("POST"),
+        data: JSON.stringify(data),
+        success: function (response) {
+            if(response.success){
+                localStorage.clear();
+                showValidationMessage("Success","succes",response.message);
+                setTimeout(function () {
+                window.location.href="/login";
+                }, 2000);
+            }
+        }, error: function (error) {
+            /*if(!error.responseJSON.success){
+                showValidationMessage("ERROR", "error", error.responseJSON.message);
+            }*/
+
+        }
+    });
+}
+
 function getDomain(){
 
     return "http://localhost:3232";

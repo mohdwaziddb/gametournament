@@ -66,4 +66,13 @@ public class AuthenticationController {
             return mobileResponseDTOFactory.reportInternalServerError(e);
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody Map<String ,Object> param, HttpServletRequest request) {
+        try {
+            return authService.logout(param,request);
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
 }

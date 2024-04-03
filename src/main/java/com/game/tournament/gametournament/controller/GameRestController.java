@@ -149,7 +149,7 @@ public class GameRestController {
     @GetMapping("/getuserdetailsbyid")
     public Object getUserDetailsById(@RequestParam Map<String, Object> param, HttpServletRequest request) {
         try {
-            return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getUserDetailsById(param,request)), HttpStatus.OK);
+            return gameService.getUserDetailsById(param,request);
         } catch (Exception e) {
             return mobileResponseDTOFactory.reportInternalServerError(e);
         }

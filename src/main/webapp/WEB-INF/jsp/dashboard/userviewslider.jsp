@@ -11,6 +11,7 @@
         <ul>
             <li onclick="viewOpenNew('/game/userprofile')">Profile</li>
             <li>About</li>
+            <li onclick="logoutProfile()">Logout</li>
         </ul>
     </div>
 </div>

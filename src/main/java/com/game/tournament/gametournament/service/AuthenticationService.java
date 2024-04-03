@@ -19,6 +19,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -237,5 +238,25 @@ public class AuthenticationService {
         }
 
         return mobileResponseDTOFactory.failedMessage("Not Matched");
+    }
+
+    @Transactional
+    public ResponseEntity<?> logout(Map<String ,Object> param, HttpServletRequest request) {
+        Long userid = DataTypeUtility.longValue(param.get("userid"));
+        boolean present = userRepository.findAllById(userid).isPresent();
+        if(present){
+            Long currentUserId = mobileResponseDTOFactory.getCurrentUserId(request);
+            if(currentUserId.equals(userid)){
+                List<Token> usertoken = tokenRepository.findAllTokensByUsers(userid);
+                if(usertoken != null && usertoken.size()>0){
+                    for (Token token : usertoken) {
+                        token.setLoggedOut(true);
+                        tokenRepository.save(token);
+                    }
+                    return mobileResponseDTOFactory.successMessage("Logout");
+                }
+            }
+        }
+        return mobileResponseDTOFactory.failedMessage("Cannot Logout");
     }
 }

@@ -70,6 +70,29 @@
 
 
   $(document).ready(function () {
+
+    var urlSearchParams = new URLSearchParams(window.location.search);
+    /*for(var [key,value] in urlSearchParams){
+        console.log(key);
+        console.log(value);
+        console.log(key);
+    }*/
+    var encryptedData = urlSearchParams.get('__code__');
+    var decodedData = atob(encryptedData);
+
+    let decorderdate_split = decodedData.split("&");
+    var storing_decordeddata_obj = {};
+    for(var i in decorderdate_split){
+      let key_value_both = decorderdate_split[i].split("=");
+      let key = key_value_both[0];
+      let value = key_value_both[1];
+      storing_decordeddata_obj[key]=value;
+    }
+
+    var userid = storing_decordeddata_obj.userid;
+
+
+
     onloadMethod();
   });
 

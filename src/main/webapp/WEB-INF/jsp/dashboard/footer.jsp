@@ -5,4 +5,3 @@
 
 
 
-<input id="userid" type="hidden">

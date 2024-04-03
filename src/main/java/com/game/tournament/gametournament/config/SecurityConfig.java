@@ -29,6 +29,8 @@ public class SecurityConfig {
 
     private final CustomLogoutHandler logoutHandler;
 
+    private final String[] abc = {"/","/login","/forgetpassword"};
+
     public SecurityConfig(UserDetailsServiceImp userDetailsServiceImp,
                           JwtAuthenticationFilter jwtAuthenticationFilter,
                           CustomLogoutHandler logoutHandler) {

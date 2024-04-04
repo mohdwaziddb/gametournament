@@ -164,6 +164,16 @@ public class GameRestController {
         }
     }
 
+    @GetMapping("/gettournamentanduserdetails")
+    public Object getTournamentAndUserDetails(@RequestParam Map<String, Object> param, HttpServletRequest request) {
+        try {
+            return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getTournamentAndUserDetails(param,request)), HttpStatus.OK);
+
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
+
 
 
 

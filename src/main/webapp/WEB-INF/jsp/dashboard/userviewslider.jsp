@@ -8,13 +8,18 @@
 <div class="slider" id="slider">
     <div class="menu">
         <span class="close-btn" onclick="toggleMenu()">X</span>
-        <ul>
-            <li onclick="viewOpenNew('/game/userprofile')">Profile</li>
-            <li>About</li>
-            <li onclick="logoutProfile()">Logout</li>
+        <ul class="menu-list">
+            <li class="menu-item" onclick="window.location.href='/game/homepage'">Home</li>
+            <li class="menu-item" onclick="viewOpenNew('/game/userprofile')">Profile</li>
+            <li class="menu-item" onclick="viewOpenNew('/game/activetournament')">Active Tournament</li>
+            <li class="menu-item" onclick="viewOpenNew('/game/alljointournament')">All Joined Tournament</li>
+            <li class="menu-item" onclick="viewOpenNew('/game/winningtournament')">Winning Tournament</li>
+            <li class="menu-item">About</li>
+            <li class="menu-item" onclick="logoutProfile()">Logout</li>
         </ul>
     </div>
 </div>
+
 
 <script>
 

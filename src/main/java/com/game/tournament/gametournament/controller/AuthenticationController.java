@@ -9,10 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -71,6 +68,16 @@ public class AuthenticationController {
     public ResponseEntity<?> logout(@RequestBody Map<String ,Object> param, HttpServletRequest request) {
         try {
             return authService.logout(param,request);
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
+
+    @GetMapping("/admindetailsbyusername")
+    public Object adminDetailsByUsername(@RequestParam Map<String, Object> param, HttpServletRequest request) {
+        try {
+            return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", authService.adminDetailsByUsername(param,request)), HttpStatus.OK);
+
         } catch (Exception e) {
             return mobileResponseDTOFactory.reportInternalServerError(e);
         }

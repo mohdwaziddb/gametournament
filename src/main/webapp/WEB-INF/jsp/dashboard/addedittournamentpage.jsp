@@ -44,16 +44,6 @@
   }
 </style>
 <body>
-
-<div class="icon" onclick="toggleLogin(event)">
-  <i class="fas fa-user"></i>
-</div>
-<div class="login-details" id="loginDetails">
-  <p>Name: John Doe</p>
-  <p>Email: johndoe@example.com</p>
-  <p>Phone: +1234567890</p>
-  <p>Username: johndoe123</p>
-</div>
 <div class="container">
   <h2 id="add_edit_tournament">Add Tournament</h2>
   <form>

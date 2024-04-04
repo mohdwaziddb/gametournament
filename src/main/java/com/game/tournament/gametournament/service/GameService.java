@@ -599,7 +599,33 @@ public class GameService {
         }
 
         return mobileResponseDTOFactory.failedMessage("Cannot Save");
+    }
 
+    public Object getTournamentAndUserDetails(Map<String,Object> param, HttpServletRequest request) throws Exception {
+        HashMap<String ,Object> resultMap = new HashMap<>();
+        Map<Long, Object> usernamemap = DataTypeUtility.getIdFieldMap(userRepository, "username");
+
+
+        List<Tournaments> tournament_list = tournamentRepo.findAllByIsdeletedIsFalseOrIsdeletedIsNullOrderByIdDesc();
+        Map<Long, Object> pricemap = DataTypeUtility.getIdFieldMap(tournamentPriceRepo, "price");
+        List<Map<String ,Object>> tournamenprice_new = new ArrayList<>();
+        for (Tournaments tournaments : tournament_list) {
+            Map<String ,Object> datamap = new HashMap<>();
+            if(tournaments.getIscompleted() != null){
+                if(tournaments.getIscompleted())
+                continue;
+            }
+            Long id = tournaments.getId();
+            String name = tournaments.getName();
+            String price = DataTypeUtility.stringValue(pricemap.get(tournaments.getPriceid()));
+            datamap.put("id",id);
+            datamap.put("name",name);
+            datamap.put("price",price);
+            tournamenprice_new.add(datamap);
+        }
+        resultMap.put("users",usernamemap);
+        resultMap.put("tournaments",tournamenprice_new);
+        return resultMap;
     }
 
 

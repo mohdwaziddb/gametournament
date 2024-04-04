@@ -1,8 +1,54 @@
 <%@ include file="/WEB-INF/jsp/dashboard/admindashboardheader.jsp"%>
 <title>Create Price</title>
-<link id="manifest"  rel="manifest" crossorigin="use-credentials" href="/manifest.json">
+<link id="manifest" rel="manifest" crossorigin="use-credentials" href="/manifest.json">
 <style>
+    /* Styling for select wrapper */
+    .select-wrapper {
+        position: relative;
+    }
 
+    /* Hide options initially */
+    .options {
+        display: none;
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ccc;
+        z-index: 1;
+        width: 100%; /* Adjust width to fit container */
+        margin-top: 5px; /* Add some margin from the input */
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); /* Add a box shadow for better appearance */
+    }
+
+    /* Show options when select wrapper is clicked */
+    .select-wrapper:focus-within .options {
+        display: block;
+    }
+
+    /* Style for input field */
+    #selectedUsername {
+        /* width: 100%;*/ /* Adjust width to fit container */
+        padding: 10px; /* Add some padding for better appearance */
+        border: 1px solid #ccc; /* Add border */
+        border-radius: 5px; /* Add border radius for better appearance */
+        cursor: pointer; /* Change cursor to pointer */
+    }
+
+    /* Style for individual options */
+    .options select {
+        width: 100%; /* Adjust width to fit container */
+        border: none; /* Remove default select border */
+        background-color: transparent; /* Make background transparent */
+    }
+
+    /* Style for single select */
+    .single-select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: transparent;
+    }
 </style>
 <body>
 <div class="container">
@@ -37,9 +83,15 @@
             <span class="close" onclick="closeModal()">&times;</span>
             <h2 id="add_edit_price">Add Winner</h2>
             <form>
-                <label for="price">Username:</label><br>
-                <input type="text" id="Username" name="text"><br>
-                <label for="price">Tournament:</label><br>
+                <!-- Replace input field with styled select -->
+                <div class="select-wrapper">
+                    <input type="text" id="selectedUsername" placeholder="Select Winner Name" readonly>
+                    <div class="options" id="options">
+                        <select multiple id="usernames" name="usernames" onchange="updateSelectedUsernames()">
+                        </select>
+                    </div>
+                </div>
+                <label for="tournament">Tournament:</label><br>
                 <input type="text" id="tournament" name="tournament"><br>
                 <label for="price">Price:</label><br>
                 <input disabled type="text" id="price" name="price"><br>
@@ -47,19 +99,19 @@
             </form>
         </div>
     </div>
+
 </div>
 
 <script>
 
     $(document).ready(function () {
-        onloadMethod();
+        //onloadMethod();
     });
 
-    function onloadMethod(){
-        let domain = getDomain() + "/rest/game/price_list";
+    function AddButtonClick() {
+        let domain = getDomain() + "/rest/game/gettournamentanduserdetails";
 
-        let data = {
-        }
+        let data = {}
 
         $.ajax({
             type: "GET",
@@ -69,28 +121,20 @@
             data: data,
             success: function (response) {
                 //console.log(response);
-                let priceList = response.data.price_list;
-                let tabledate = "";
-                let srno=1;
-                if(priceList != null && priceList.length>0){
-                    for (let data in priceList) {
-                        let priceListElement = priceList[data];
-                        let name = priceListElement.price;
-                        let id = priceListElement.id;
-                        tabledate += '<tr>'
-                            +'<td>'+srno+++'</td>'
-                            +'<td>'+name+'</td>'
-                            +'<td>'+name+'</td>'
-                            +'<td class="action-buttons">'
-                            +'<button class="edit-btn" onclick="editBut('+id+')">Edit</button>'
-                            +'</td>'
-                            +'</tr>'
+                let user_list = response.data.users;
+                let tournament_list = response.data.tournaments;
+                let optiodate = "";
+                if (user_list != null) {
+                    for (let data in user_list) {
+                        let id = data;
+                        let name = user_list[data];
+                        optiodate += '<option value="'+id+'">'+name+'</option>'
                     }
-                    $('#pricedata').html(tabledate);
+                    $('#usernames').html(optiodate);
                 }
 
             }, error: function (error) {
-                if(!error.responseJSON.success){
+                if (!error.responseJSON.success) {
                     showValidationMessage("ERROR", "error", error.responseJSON.message);
                 }
 
@@ -104,7 +148,7 @@
         let domain = getDomain() + "/rest/game/price_list";
 
         let data = {
-            "id":id
+            "id": id
         }
 
         $.ajax({
@@ -115,7 +159,7 @@
             data: data,
             success: function (response) {
                 let priceList = response.data.price_list;
-                if(priceList != null){
+                if (priceList != null) {
                     for (let data in priceList) {
                         let name = priceList.price;
                         let id = priceList.id;
@@ -125,7 +169,7 @@
                 }
 
             }, error: function (error) {
-                if(!error.responseJSON.success){
+                if (!error.responseJSON.success) {
                     showValidationMessage("ERROR", "error", error.responseJSON.message);
                 }
 
@@ -134,15 +178,15 @@
     }
 
 
-    function savePrice(){
+    function savePrice() {
         let price = $('#price').val();
         let id = $('#price_id').val();
 
         let domain = getDomain() + "/rest/game/createprice";
 
         let data = {
-            "price":price,
-            "id":id
+            "price": price,
+            "id": id
         }
 
         $.ajax({
@@ -153,13 +197,13 @@
             data: JSON.stringify(data),
             success: function (response) {
                 //console.log(response);
-                if(response.success){
+                if (response.success) {
                     window.location.reload();
                     closeModal();
                 }
 
             }, error: function (error) {
-                if(!error.responseJSON.success){
+                if (!error.responseJSON.success) {
                     showValidationMessage("ERROR", "error", error.responseJSON.message);
                 }
 
@@ -175,6 +219,19 @@
         $('#add_edit_price').text('Add Price');
         $('#price_id').val('');
         $('#price').val('');
+        AddButtonClick();
+    }
+
+    // Update the input field with selected usernames
+    function updateSelectedUsernames() {
+        let selectedOptions = $('#usernames option:selected');
+        let selectedUsernames = [];
+
+        selectedOptions.each(function () {
+            selectedUsernames.push($(this).text());
+        });
+
+        $('#selectedUsername').val(selectedUsernames.join(', '));
     }
 </script>
 

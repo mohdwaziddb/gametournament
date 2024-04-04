@@ -21,6 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.crypto.Data;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -258,5 +260,20 @@ public class AuthenticationService {
             }
         }
         return mobileResponseDTOFactory.failedMessage("Cannot Logout");
+    }
+
+    public Object adminDetailsByUsername(Map<String, Object> param, HttpServletRequest request){
+        Map<String,Object> resultMap = new HashMap<>();
+        String username = DataTypeUtility.stringValue(param.get("username"));
+        String currentUserName = mobileResponseDTOFactory.getCurrentUserName(request);
+        if(username.equals(currentUserName)){
+            Users usermodal = userRepository.findByUsername(username).get();
+            resultMap.put("username",usermodal.getUsername());
+            resultMap.put("emailid",usermodal.getEmailid());
+            resultMap.put("mobileno",usermodal.getMobileno());
+            resultMap.put("name",usermodal.getFirstname() + " " + usermodal.getLastname());
+        }
+
+        return resultMap;
     }
 }

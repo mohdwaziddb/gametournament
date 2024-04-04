@@ -299,13 +299,14 @@ function logoutProfile(){
                 }, 2000);
             }
         }, error: function (error) {
-            /*if(!error.responseJSON.success){
+            if(!error.responseJSON.success){
                 showValidationMessage("ERROR", "error", error.responseJSON.message);
-            }*/
+            }
 
         }
     });
 }
+
 
 function getDomain(){
 

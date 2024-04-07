@@ -62,7 +62,7 @@ public class AuthenticationService {
             return mobileResponseDTOFactory.failedMessage("Username must be at least 3 characters");
         }
 
-        Long mobileno = userrequest.getMobileno();
+        String mobileno = userrequest.getMobileno();
         if(mobileno == null || mobileno.equals("")){
             return mobileResponseDTOFactory.failedMessage("Mobile No. cannot be blank");
         }
@@ -175,7 +175,7 @@ public class AuthenticationService {
 
     public ResponseEntity<?> forgetPassword(Users userrequest) {
         String username = userrequest.getUsername();
-        Long mobileno = userrequest.getMobileno();
+        String mobileno = userrequest.getMobileno();
         String emailid = userrequest.getEmailid();
         String newpassword = userrequest.getPassword();
         if(username == null || username.equals("")){

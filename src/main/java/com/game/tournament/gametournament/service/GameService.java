@@ -1,6 +1,5 @@
 package com.game.tournament.gametournament.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.game.tournament.gametournament.model.*;
 import com.game.tournament.gametournament.repository.*;
 import com.game.tournament.gametournament.utils.DataTypeUtility;
@@ -10,14 +9,25 @@ import com.razorpay.RazorpayClient;
 import jakarta.servlet.http.HttpServletRequest;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -26,6 +36,13 @@ public class GameService {
     private static String Key = "rzp_test_x2FdmAMnovVzvG";
     private static String Key_Secret = "4t7mqBhnN3X2Ronlgc59Ql8Q";
     private static String Currecny = "INR";
+
+    @Value("${image.upload.dir}")
+    private String imageUploadDir;
+
+    private static final String imageUploadDirTournament = "src/main/resources/static/images/tournament/";
+
+    private static final String getimageUploadDirTournament = "/images/tournament/";
 
     @Autowired
     private GameRepo gameRepo;
@@ -175,6 +192,7 @@ public class GameService {
         Long maximum_player = DataTypeUtility.longValue(param.get("maximum_player"));
         String secret_code = DataTypeUtility.stringValue(param.get("secret_code"));
         Boolean is_completed = DataTypeUtility.booleanValue(param.get("is_completed"));
+        Boolean isimagechange = DataTypeUtility.booleanValue(param.get("isimagechange"));
         boolean isStartTimeBeforeEndTime = false;
         if(starttime != null && !starttime.equals("") && endtime != null && !endtime.equals("")) {
             isStartTimeBeforeEndTime = compareTimes(starttime, endtime);
@@ -187,8 +205,6 @@ public class GameService {
         if(isStartTimeBeforeEndTime){
             return mobileResponseDTOFactory.failedMessage("Start Time before End Time");
         }
-
-
 
         if(name == null || name.equals("")){
             mobileResponseDTOFactory.failedMessage("Name cannot be Blank");
@@ -218,20 +234,22 @@ public class GameService {
             mobileResponseDTOFactory.failedMessage("Maximum Player cannot be Blank");
         }
 
-        String imageDataJson = "";
-        try {
-            Map<String, Object> imageDataMap = new HashMap<>();
-            if(file !=null){
-            imageDataMap.put("filename", file.getOriginalFilename());
-            imageDataMap.put("type", file.getContentType());
-            imageDataMap.put("size", file.getSize());
-            imageDataMap.put("orignalfilename", file.getOriginalFilename());
-            ObjectMapper objectMapper = new ObjectMapper();
-            imageDataJson = objectMapper.writeValueAsString(imageDataMap);
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        String fileName = "";
+        if(file != null && !file.isEmpty()) {
+            fileName = timestamp + "__" + file.getOriginalFilename();
+            try {
+                Path uploadPath = Paths.get(ResourceUtils.getURL(imageUploadDirTournament).toURI());
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+                Files.copy(file.getInputStream(), uploadPath.resolve(fileName));
+            } catch (Exception e) {
+                e.printStackTrace();
+                //return mobileResponseDTOFactory.failedMessage("Failed to save image");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+
 
         if(id != null && id >0){
             boolean present = tournamentRepo.findById(id).isPresent();
@@ -246,8 +264,13 @@ public class GameService {
                     tournaments.setGameid(game);
                     tournaments.setDescription(description);
                     tournaments.setDate(date);
-                    //tournaments.setAttachment(file.getBytes());
-                    tournaments.setAttachment(imageDataJson);
+
+                    if(isimagechange){
+                        tournaments.setAttachment(fileName);
+                    } else {
+                        tournaments.setAttachment(tournaments.getAttachment());
+                    }
+
                     tournaments.setStarttime(starttime);
                     tournaments.setEndtime(endtime);
                     tournaments.setMinimumplayer(minimum_player);
@@ -266,7 +289,7 @@ public class GameService {
             tournaments.setGameid(game);
             tournaments.setDescription(description);
             tournaments.setDate(date);
-            tournaments.setAttachment(imageDataJson);
+            tournaments.setAttachment(fileName);
             tournaments.setStarttime(starttime);
             tournaments.setEndtime(endtime);
             tournaments.setMinimumplayer(minimum_player);
@@ -383,7 +406,7 @@ public class GameService {
         return !date.before(currentDate) && !date.after(tomorrowDate);
     }
 
-    public Object getTournamentsForUser(Map<String,Object> param, HttpServletRequest request) throws NoSuchFieldException, IllegalAccessException {
+    public Object getTournamentsForUser(Map<String,Object> param, HttpServletRequest request) throws Exception {
         Map<String,Object> resultMap = new HashMap<>();
         Long id = DataTypeUtility.longValue(param.get("id"));
         Map<Long, Object> price_map = DataTypeUtility.getIdFieldMap(tournamentPriceRepo, "price");
@@ -398,7 +421,7 @@ public class GameService {
             }
         }
 
-        if(id != null && id>0){
+        /*if(id != null && id>0){
             boolean present = tournamentRepo.findById(id).isPresent();
             if(present){
                 Tournaments tournaments = tournamentRepo.findById(id).get();
@@ -420,37 +443,43 @@ public class GameService {
                     }
                 }
             }
-        } else {
+        } else {*/
+        if(currentUserId!= null && !currentUserId.equals("")){
             List<Tournaments> tournamentsList = tournamentRepo.getTournaments();
             List<Map<String ,Object>> tournament_list = new ArrayList<>();
-            if(tournamentsList != null && tournamentsList.size()>0){
+            if(tournamentsList != null && tournamentsList.size()>0) {
                 for (Tournaments obj : tournamentsList) {
-                    Map<String,Object> tournament_map = new HashMap<>();
+                    Map<String, Object> tournament_map = new HashMap<>();
                     Long objId = obj.getId();
-                    tournament_map.put("name",obj.getName());
-                    tournament_map.put("date",obj.getDate());
-                    tournament_map.put("description",obj.getDescription());
-                    tournament_map.put("endtime",obj.getEndtime());
-                    tournament_map.put("maximumplayer",obj.getMaximumplayer());
-                    tournament_map.put("minimumplayer",obj.getMinimumplayer());
-                    tournament_map.put("starttime",obj.getStarttime());
-                    tournament_map.put("secretcode",obj.getSecretcode());
-                    tournament_map.put("id",objId);
-                    //byte[] attachment = obj.getAttachment();
-                    tournament_map.put("attachment",obj.getAttachment());
-                    tournament_map.put("price",price_map.get(obj.getPriceid()));
-                    tournament_map.put("game",game_map.get(obj.getGameid()));
-                    if(join_tournament_set.contains(objId)){
-                        tournament_map.put("isjoin",true);
+                    tournament_map.put("name", obj.getName());
+                    tournament_map.put("date", obj.getDate());
+                    tournament_map.put("description", obj.getDescription());
+                    tournament_map.put("endtime", obj.getEndtime());
+                    tournament_map.put("maximumplayer", obj.getMaximumplayer());
+                    tournament_map.put("minimumplayer", obj.getMinimumplayer());
+                    tournament_map.put("starttime", obj.getStarttime());
+                    tournament_map.put("secretcode", obj.getSecretcode());
+                    tournament_map.put("id", objId);
+                    String attachment = obj.getAttachment();
+                    String imageUrl = "";
+                    if(attachment != null && !attachment.equals("")){
+                        imageUrl = getimageUploadDirTournament + attachment;
+                    }
+
+                    tournament_map.put("attachment", imageUrl);
+                    tournament_map.put("price", price_map.get(obj.getPriceid()));
+                    tournament_map.put("game", game_map.get(obj.getGameid()));
+                    if (join_tournament_set.contains(objId)) {
+                        tournament_map.put("isjoin", true);
                     } else {
                         tournament_map.put("isjoin", false);
                     }
 
 
-
                     tournament_list.add(tournament_map);
                 }
             }
+           // }
 
             resultMap.put("list",tournament_list);
             resultMap.put("userid",currentUserId);
@@ -510,7 +539,7 @@ public class GameService {
             }
         }
         String username = user_map.get(currentUserId).getUsername();
-        Long mobileno = user_map.get(currentUserId).getMobileno();
+        String mobileno = user_map.get(currentUserId).getMobileno();
         String emailid = user_map.get(currentUserId).getEmailid();
 
         TransactionalDetails transactionalDetails = new TransactionalDetails(orderid,amount,currency,Key,Key_Secret,username,mobileno,emailid);
@@ -563,7 +592,7 @@ public class GameService {
             String username = usermodal.getUsername();
             String firstname = usermodal.getFirstname();
             String lastname = usermodal.getLastname();
-            Long mobileno = usermodal.getMobileno();
+            String mobileno = usermodal.getMobileno();
             String emailid = usermodal.getEmailid();
             if(currentUserName.equalsIgnoreCase(username)){
                 resultMap.put("firstname",firstname);
@@ -582,7 +611,7 @@ public class GameService {
         String firstname = DataTypeUtility.stringValue(param.get("firstname"));
         String lastname = DataTypeUtility.stringValue(param.get("lastname"));
         String emailid = DataTypeUtility.stringValue(param.get("emailid"));
-        Long phoneno = DataTypeUtility.longValue(param.get("phoneno"));
+        String phoneno = DataTypeUtility.stringValue(param.get("phoneno"));
         boolean present = userRepository.findAllById(userid).isPresent();
         String currentUserName = mobileResponseDTOFactory.getCurrentUserName(request);
         if(present){

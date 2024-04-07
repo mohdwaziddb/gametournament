@@ -65,7 +65,8 @@
     <label for="tournament_image">Image:</label><br><br>
     <div class="file-input-container" style="width: 98%;">
       <div class="custom-file-input" onclick="document.getElementById('tournament_image').click()">
-        <span class="placeholder-text">Choose a file...</span>
+        <span id="imagename_placeholder" class="placeholder-text">Choose a file...</span>
+        <input id="isimagechange" type="hidden"></input>
       </div>
       <input type="file" id="tournament_image" name="tournament_image" onchange="updatePlaceholder()">
     </div>
@@ -141,7 +142,16 @@
         let secretcode1 = valuecheck(tournament.secretcode);
         let starttime1 = valuecheck(tournament.starttime);
         let is_completed = valuecheck(tournament.iscompleted);
+        let attachment = valuecheck(tournament.attachment);
+        let imageDateTime = "";
+        let imageFileName = ""
+        if(attachment != undefined && attachment != null){
+          let split = attachment.split('__');
+          imageDateTime = split[0];
+          imageFileName = split[1];
+        }
 
+        $('#imagename_placeholder').text(imageFileName);
         $('#tournament_name').val(name1);
         $('#tournament_description').val(description1);
         $('#tournament_date').val(date1);
@@ -198,6 +208,7 @@
   }
 
   function updatePlaceholder() {
+    $('#isimagechange').val(true);
     const input = document.getElementById('tournament_image');
     const placeholder = document.querySelector('.placeholder-text');
 
@@ -220,6 +231,7 @@
     let tournament_min_player = $('#tournament_min_player').val();
     let tournament_max_player = $('#tournament_max_player').val();
     let tournament_secret_code = $('#tournament_secret_code').val();
+    let tournament_isimagechange = $('#isimagechange').val();
 
     if(tournament_name==undefined || tournament_name==null || tournament_name==""){
       return showValidationMessage("ERROR", "error", "Name cannot be blank");
@@ -268,6 +280,7 @@
     formData.append('maximum_player', tournament_max_player);
     formData.append('secret_code', tournament_secret_code);
     formData.append('is_completed', is_completed);
+    formData.append('isimagechange', tournament_isimagechange);
 
     /*let data = {
       "name":tournament_name,

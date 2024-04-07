@@ -65,7 +65,8 @@
 
                         tabledate += '<div class="container">'
                             +'<div class="card">'
-                            +'<img src="https://www.w3schools.com/w3images/hamburger.jpg" alt="Image 1">'
+                            //+'<img src="https://www.w3schools.com/w3images/hamburger.jpg" alt="Image 1">'
+                            +'<img src="'+attachment+'" alt="Image">'
                             +'<div class="details">'
                             +'<h2>'+name+'</h2>'
                             +'<p>Price: '+price+'</p>'
@@ -80,6 +81,13 @@
                             +'</div>'
                     }
                     $('#tournamentdata').html(tabledate);
+                } else {
+                    tabledate += '<div class="centered-div">No data available</div>';
+                    $('#tournamentdata').html(tabledate);
+                }
+
+                if(userid==null || userid==""){
+                    $('.menu-icon').addClass("d-none");
                 }
 
             }, error: function (error) {

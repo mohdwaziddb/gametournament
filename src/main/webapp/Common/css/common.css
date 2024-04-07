@@ -5,6 +5,9 @@ body {
     background-color: #fff;
     color: #fff;
 }
+.d-none {
+    display: none;
+}
 .container {
     max-width: 600px;
     margin: 40px auto; /* Centering the container */
@@ -150,6 +153,7 @@ input[type="number"]::-webkit-outer-spin-button {
     width: 100%;
     height: auto;
     display: block;
+    height: 175px;
 }
 .card .details {
     padding: 10px;
@@ -180,4 +184,18 @@ input[type="number"]::-webkit-outer-spin-button {
     background: #ffffff;
     height: 40px;
     color: #444;
+}
+
+.centered-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px; /* Set desired height */
+    border: 2px solid #ccc; /* Add border for visibility */
+    border-radius: 10px; /* Add border radius */
+    font-family: Arial, sans-serif; /* Choose desired font */
+    font-size: 18px; /* Choose desired font size */
+    color: #333; /* Choose desired text color */
+    background-color: #f0f0f0; /* Choose desired background color */
+    margin: 100px;
 }

@@ -13,10 +13,10 @@ public class TransactionalDetails {
     private String key;
     private String key_secret;
     private String username;
-    private Long mobileno;
+    private String mobileno;
     private String emailid;
 
-    public TransactionalDetails(String orderid, Integer amount, String currency, String key, String key_secret, String username, Long mobileno, String emailid) {
+    public TransactionalDetails(String orderid, Integer amount, String currency, String key, String key_secret, String username, String mobileno, String emailid) {
         this.orderid = orderid;
         this.amount = amount;
         this.currency = currency;

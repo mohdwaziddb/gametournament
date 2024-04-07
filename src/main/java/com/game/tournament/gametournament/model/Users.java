@@ -38,7 +38,7 @@ public class Users implements UserDetails {
     private String password;
 
     @Column(name = "mobileno",nullable = false,length = 15)
-    private Long mobileno;
+    private String mobileno;
 
     @Column(name = "emailid",nullable = false,length = 30)
     private String emailid;

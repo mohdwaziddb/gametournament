@@ -3,6 +3,8 @@ package com.game.tournament.gametournament.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.List;
 
@@ -10,6 +12,8 @@ import java.util.List;
 @Table(name = "tournaments")
 @Getter
 @Setter
+@DynamicInsert
+@DynamicUpdate
 public class Tournaments {
 
     @Id
@@ -46,6 +50,8 @@ public class Tournaments {
     private Boolean isdeleted;
 
     private Boolean iscompleted;
+
+    /*private String winnerprizes;*/
 
     @Transient
     private String price;

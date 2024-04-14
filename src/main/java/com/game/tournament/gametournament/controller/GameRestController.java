@@ -174,6 +174,42 @@ public class GameRestController {
         }
     }
 
+    @GetMapping("/get_active_tournament")
+    public Object getActiveTournament(@RequestParam Map<String, Object> param) {
+        try {
+            return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getActiveTournament(param)), HttpStatus.OK);
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
+
+    @GetMapping("/get_winners_data")
+    public Object getWinnersData(@RequestParam Map<String, Object> param) {
+        try {
+            return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getWinnersData(param)), HttpStatus.OK);
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
+
+    @PostMapping("/save_winners_data")
+    public ResponseEntity<?> saveWinnersData(@RequestBody Map<String, Object> param, HttpServletRequest request) {
+        try {
+            return gameService.saveWinnersData(param,request);
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
+
+    @GetMapping("/get_winners_tournament_list")
+    public Object getWinnersTournamentList(@RequestParam Map<String, Object> param) {
+        try {
+            return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getWinnersTournamentList(param)), HttpStatus.OK);
+        } catch (Exception e) {
+            return mobileResponseDTOFactory.reportInternalServerError(e);
+        }
+    }
+
 
 
 

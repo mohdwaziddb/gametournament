@@ -126,5 +126,96 @@
       text-decoration: none;
       cursor: pointer;
     }
+    select {
+        width: 100%;
+        background: #ffffff;
+        color: #444;
+        padding: 8px; /* Add padding for better appearance */
+        border: 1px solid #ccc; /* Add a border */
+        border-radius: 5px; /* Optional: Add border radius for rounded corners */
+        box-sizing: border-box; /* Make sure padding and border are included in the element's total width */
+    }
+
+    /* Hide default file input appearance */
+    input[type="file"] {
+        display: none;
+    }
+
+    /* Style for the custom file input container */
+    .file-input-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    /* Style for the custom file input */
+    .custom-file-input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        background: #fff;
+        height: 12px;
+        color: #444;
+    }
+
+    /* Style for the placeholder text */
+    .placeholder-text {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+        color: #999;
+    }
+
+    .dbTab td {
+        padding: 5px;
+    }
+    /* Styling for select wrapper */
+    .select-wrapper {
+        position: relative;
+    }
+
+    /* Hide options initially */
+    .options {
+        display: none;
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ccc;
+        z-index: 1;
+        width: 100%; /* Adjust width to fit container */
+        margin-top: 5px; /* Add some margin from the input */
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); /* Add a box shadow for better appearance */
+    }
+
+    /* Show options when select wrapper is clicked */
+    .select-wrapper:focus-within .options {
+        display: block;
+    }
+
+    /* Style for input field */
+    #selectedUsername {
+        /* width: 100%;*/ /* Adjust width to fit container */
+        padding: 10px; /* Add some padding for better appearance */
+        border: 1px solid #ccc; /* Add border */
+        border-radius: 5px; /* Add border radius for better appearance */
+        cursor: pointer; /* Change cursor to pointer */
+    }
+
+    /* Style for individual options */
+    .options select {
+        width: 100%; /* Adjust width to fit container */
+        border: none; /* Remove default select border */
+        background-color: transparent; /* Make background transparent */
+    }
+
+    /* Style for single select */
+    .single-select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: transparent;
+    }
   </style>
 </head>

@@ -42,10 +42,17 @@
         transform: translateY(-50%);
         color: #999;
     }
+
+    .tournament_img {
+        width: 100%;
+        height: 175px;
+        border-radius: 11px;
+    }
 </style>
 
 <div class="container">
     <h2 id="add_edit_tournament">Tournament</h2>
+    <img class="tournament_img" id="tournament_image" src="" alt="Tournament Image"><br><br>
     <form>
         <%--<label for="tournament_name">Name:</label><br>
         <input disabled type="text" id="tournament_name" name="tournament_name"><br>
@@ -63,14 +70,14 @@
 
         <label for="tournament_date">Date:</label><br>
         <input disabled type="date" id="tournament_date" name="tournament_date"><br>
-        <label for="tournament_image">Image:</label><br><br>
+        <%--<label for="tournament_image">Image:</label><br><br>
         <div class="file-input-container" style="width: 98%;">
             <div class="custom-file-input" onclick="document.getElementById('tournament_image').click()">
                 <span class="placeholder-text">Choose a file...</span>
             </div>
             <input type="file" id="tournament_image" name="tournament_image" onchange="updatePlaceholder()">
         </div>
-        <br><br>
+        <br><br>--%>
 
 
         <label for="tournament_start">Start Time:</label><br>
@@ -130,6 +137,7 @@
                 let secretcode1 = valuecheck(tournament.secretcode);
                 let starttime1 = valuecheck(tournament.starttime);
                 let isjoin1 = valuecheck(tournament.isjoin);
+                let attachment = valuecheck(tournament.attachment);
 
                 //$('#tournament_name').val(name1);
                 $('#add_edit_tournament').text(name1);
@@ -143,6 +151,7 @@
 
                 $('#tournament_game').val(game1);
                 $('#tournament_price').val(price1);
+                $('#tournament_image').attr('src', attachment);
 
                 if(isjoin1){
                     $('#joinButt').text("Already Joined");

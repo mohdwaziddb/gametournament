@@ -10,6 +10,7 @@ import java.util.List;
 public interface PlayerRepo extends JpaRepository <Players,Long> {
 
     List<Players> findAllByUserid(Long userid);
+    List<Players> findAllByTounamentid(Long tournament);
 
     List<Players> findAllByOrderByIdDesc();
 

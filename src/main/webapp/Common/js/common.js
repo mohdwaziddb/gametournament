@@ -312,3 +312,18 @@ function getDomain(){
 
     return "http://localhost:3232";
 }
+
+function convertArrayTCommaSeparatedString(data_array) {
+    var data_string = "";
+    if (data_array != null && data_array > 0) {
+        for (let i = 0; i < data_array.length; i++) {
+            if (i == data_array.length - 1) {
+                data_string = data_string + data_array[i] + "";
+            } else {
+                data_string = data_string + data_array[i] + ",";
+            }
+        }
+
+        return data_string;
+    }
+}

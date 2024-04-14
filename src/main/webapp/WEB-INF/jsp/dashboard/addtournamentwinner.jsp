@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/jsp/dashboard/admindashboardheader.jsp"%>
-<title>Create Price</title>
-<link id="manifest" rel="manifest" crossorigin="use-credentials" href="/manifest.json">
+<title>Add/Edit Tournament Winner</title>
+<link id="manifest"  rel="manifest" crossorigin="use-credentials" href="/manifest.json">
 <style>
     /* Styling for select wrapper */
     .select-wrapper {
@@ -52,66 +52,175 @@
 </style>
 <body>
 <div class="container">
-    <div class="icon" onclick="toggleLogin(event)">
-        <i class="fas fa-user"></i>
+    <h2 id="add_edit_tournament">Add Tournament Winner</h2>
+    <form>
+        <label for="tournament_name">Tournament:</label><br>
+        <select onchange="chnageTournamentWinnerPrize(this,'')" class="" id="tournament_name"></select><br><br>
+
+        <button type="button" onclick="openModal()" id="winner_prize" style="width: 100%; background: #ff5454; font-weight: 600;">Add Winner Prizes</button><br>
+
+<%--
+        <button type="button" onclick="saveTournament()">Save</button>--%>
+    </form>
+</div>
+
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="add_tournament_modal_header"></h2>
+        <table  class="dbTab">
+            <thead><tr>
+                <td>From</td>
+                <td>To</td>
+                <td>Prize (Amt)</td>
+                <td>
+                Select Winners
+                </td>
+            </tr>
+            </thead>
+            <tbody id="prizeTable">
+
+            </tbody>
+        </table>
+        <div class="text-center"><button type="button" onclick="saveWinnerActualData()">Save Winners</button></div>
     </div>
-    <div class="login-details" id="loginDetails">
-        <p>Name: John Doe</p>
-        <p>Email: johndoe@example.com</p>
-        <p>Phone: +1234567890</p>
-        <p>Username: johndoe123</p>
-    </div>
-
-    <button class="add-btn" onclick="openModal()">Add Winner</button>
-    <table>
-        <thead>
-        <tr>
-            <th>UserName</th>
-            <th>Tournament</th>
-            <th>Price</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody id="pricedata">
-
-        </tbody>
-    </table>
-
-
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2 id="add_edit_price">Add Winner</h2>
-            <form>
-                <!-- Replace input field with styled select -->
-                <div class="select-wrapper">
-                    <input type="text" id="selectedUsername" placeholder="Select Winner Name" readonly>
-                    <div class="options" id="options">
-                        <select multiple id="usernames" name="usernames" onchange="updateSelectedUsernames()">
-                        </select>
-                    </div>
-                </div>
-                <label for="tournament">Tournament:</label><br>
-                <input type="text" id="tournament" name="tournament"><br>
-                <label for="price">Price:</label><br>
-                <input disabled type="text" id="price" name="price"><br>
-                <button type="button" onclick="savePrice()">Save</button>
-            </form>
-        </div>
-    </div>
-
 </div>
 
 <script>
 
+    var urlSearchParams = new URLSearchParams(window.location.search);
+    var encryptedData = urlSearchParams.get('__code__');
+    var decodedData = atob(encryptedData);
+
+    let decorderdate_split = decodedData.split("&");
+    var storing_decordeddata_obj = {};
+    for(var i in decorderdate_split){
+        let key_value_both = decorderdate_split[i].split("=");
+        let key = key_value_both[0];
+        let value = key_value_both[1];
+        storing_decordeddata_obj[key]=value;
+    }
+
+    var tournament_id_global = storing_decordeddata_obj.tournament_id;
+
     $(document).ready(function () {
-        //onloadMethod();
+        onloadMethod();
     });
 
-    function AddButtonClick() {
-        let domain = getDomain() + "/rest/game/gettournamentanduserdetails";
 
-        let data = {}
+    function openModal() {
+        let val = $('#tournament_name').val();
+        if(val== null || val == "" || val == "-1"){
+            return showValidationMessage("ERROR", "error", "Select Tournament...");
+        }
+        document.getElementById("myModal").style.display = "block";
+        if(tournament_id_global != null && tournament_id_global != ""){
+            chnageTournamentWinnerPrize('',tournament_id_global);
+        }
+    }
+
+    var prize_id_global = "";
+
+    function chnageTournamentWinnerPrize(source,tournament_id_global){
+        let tournamentid = valuecheck(source.value);
+        if(tournament_id_global != null && tournament_id_global != ""){
+            tournamentid = tournament_id_global;
+        }
+        let data = {
+            "tournamentid":tournamentid,
+        }
+        let domain = getDomain() + "/rest/game/get_winners_data";
+        $.ajax({
+            type: "GET",
+            url: domain,
+            contentType: 'application/json',
+            headers: getHeaders("GET"),
+            data: data,
+            success: function (response) {
+                let winnerprizeslist = valuecheck(response.data.winner_prize_list);
+                let users_list = valuecheck(response.data.users_list);
+                let tournament_name = valuecheck(response.data.tournament_name);
+                $('#add_tournament_modal_header').text("Add "+tournament_name +" Winner Prizes ")
+                let user_list_data = "";
+                if(users_list != null && users_list != undefined){
+                    for (let i in users_list){
+                        let obj = valuecheck(users_list[i]);
+                        let employee_id = valuecheck(obj.id);
+                        let employee_name = valuecheck(obj.name);
+                        user_list_data += '<option value="'+employee_id+'">'+employee_name+'<option>'
+
+                    }
+                }
+                let winnertabledate="";
+                if(winnerprizeslist != null){
+                    for (let data in winnerprizeslist) {
+                        let obj = winnerprizeslist[data];
+                        let from_player = obj.fromwinner;
+                        let prize_id = obj.id;
+
+                        if (prize_id_global !== "") {
+                            prize_id_global += ",";
+                        }
+
+                        prize_id_global += prize_id;
+                        let to_player = obj.towinner;
+                        let prize = obj.prize;
+                        winnertabledate += '<tr><td id="prize_id_'+prize_id+'"><input disabled value="'+from_player+'" type="number" placeholder="From"></td>' +
+                            '<td><input disabled value="'+to_player+'" type="number" placeholder="To"></td>' +
+                            '<td><input disabled value="'+prize+'" type="number" placeholder="Winner Prize"></td>' +
+                            '<td width="40%">' +
+                            '<div class="select-wrapper">'+
+                            '<input type="text" id="selectedUsername_'+prize_id+'" placeholder="Select Winner Name" readonly>'+
+                            '<div class="options" id="options">'+
+                                '<select multiple id="usernames_'+prize_id+'" name="usernames" onchange="updateSelectedUsernames('+prize_id+')">'+
+                                    user_list_data+
+                                '</select>'+
+                            '</div>'+
+                            '</div>' +
+                            '</td></tr>';
+
+                    }
+                    $('#prizeTable').html(winnertabledate);
+                }
+
+
+            }, error: function (error) {
+                if(!error.responseJSON.success){
+                    showValidationMessage("ERROR", "error", error.responseJSON.message);
+                }
+
+            }
+        });
+    }
+
+    // Update the input field with selected usernames
+    function updateSelectedUsernames(prizeid) {
+        let selectedOptions = $('#usernames_'+prizeid+' option:selected');
+        let selectedUsernames = [];
+
+        selectedOptions.each(function () {
+            selectedUsernames.push($(this).text());
+        });
+
+        $('#selectedUsername_'+prizeid+'').val(selectedUsernames.join(', '));
+    }
+
+    function closeModal() {
+        document.getElementById("myModal").style.display = "none";
+    }
+
+    function onloadMethod(){
+        let domain = getDomain() + "/rest/game/get_active_tournament";
+        if(tournament_id_global != null && tournament_id_global != undefined){
+            $('#add_edit_tournament').text("Edit Tournament Winner");
+            $('#winner_prize').text("Show Winner Prizes");
+        } else {
+            $('#add_edit_tournament').text("Add Tournament Winner");
+            $('#winner_prize').text("Add Winner Prizes");
+        }
+
+        let data = {
+        }
 
         $.ajax({
             type: "GET",
@@ -121,74 +230,57 @@
             data: data,
             success: function (response) {
                 //console.log(response);
-                let user_list = response.data.users;
-                let tournament_list = response.data.tournaments;
-                let optiodate = "";
-                if (user_list != null) {
-                    for (let data in user_list) {
-                        let id = data;
-                        let name = user_list[data];
-                        optiodate += '<option value="'+id+'">'+name+'</option>'
-                    }
-                    $('#usernames').html(optiodate);
-                }
+                let tournament_list = valuecheck(response.data.tournament_list);
 
+                let data1 = "<option value='-1'>Select Tournament</option>";
+                if(tournament_list != null){
+                    for (let data in tournament_list) {
+                        let obj = tournament_list[data];
+                        let name = obj.name;
+                        let id = obj.id;
+                        if(tournament_id_global == id){
+                            data1 += '<option selected value="'+id+'">'+name+'</option>';
+                        } else {
+                            data1 += '<option value="'+id+'">'+name+'</option>';
+                        }
+                    }
+                    $('#tournament_name').html(data1);
+                }
             }, error: function (error) {
-                if (!error.responseJSON.success) {
+                if(!error.responseJSON.success){
                     showValidationMessage("ERROR", "error", error.responseJSON.message);
                 }
-
             }
         });
     }
 
-    function editBut(id) {
-        openModal();
-        $('#add_edit_price').text('Edit Price');
-        let domain = getDomain() + "/rest/game/price_list";
-
-        let data = {
-            "id": id
+    function saveWinnerActualData(){
+        let domain = getDomain() + "/rest/game/save_winners_data";
+        if (prize_id_global==null || prize_id_global==""){
+            return showValidationMessage("ERROR", "error", "Prizes are Empty...");
         }
 
-        $.ajax({
-            type: "GET",
-            url: domain,
-            contentType: 'application/json',
-            headers: getHeaders("GET"),
-            data: data,
-            success: function (response) {
-                let priceList = response.data.price_list;
-                if (priceList != null) {
-                    for (let data in priceList) {
-                        let name = priceList.price;
-                        let id = priceList.id;
-                        $('#price').val(name);
-                        $('#price_id').val(id);
-                    }
+        let data_list = [];
+        if(prize_id_global != null){
+            let split_prize_ids = prize_id_global.split(',');
+            for (let i in split_prize_ids){
+                let single_prizeid = split_prize_ids[i];
+                let selectedvalue = $('#usernames_'+single_prizeid).val();
+                if(selectedvalue == null || selectedvalue == ""){
+                    return showValidationMessage("ERROR", "error", "Kindly select winner in all prizes..");
                 }
-
-            }, error: function (error) {
-                if (!error.responseJSON.success) {
-                    showValidationMessage("ERROR", "error", error.responseJSON.message);
+                let map = {
+                    "id":single_prizeid,
+                    "winneruserid":convertArrayTCommaSeparatedString(selectedvalue),
                 }
-
+                data_list.push(map);
             }
-        });
-    }
-
-
-    function savePrice() {
-        let price = $('#price').val();
-        let id = $('#price_id').val();
-
-        let domain = getDomain() + "/rest/game/createprice";
-
-        let data = {
-            "price": price,
-            "id": id
         }
 
+
+        var data = {
+            "list":data_list,
+        }
         $.ajax({
             type: "POST",
             url: domain,
@@ -197,13 +289,12 @@
             data: JSON.stringify(data),
             success: function (response) {
                 //console.log(response);
-                if (response.success) {
-                    window.location.reload();
-                    closeModal();
+                if(response.success){
+                    window.location.href="/mvc/tournamentwinner";
                 }
 
             }, error: function (error) {
-                if (!error.responseJSON.success) {
+                if(!error.responseJSON.success){
                     showValidationMessage("ERROR", "error", error.responseJSON.message);
                 }
 
@@ -213,26 +304,7 @@
 
     }
 
-    // When the user clicks the button, open the modal
-    function openModal() {
-        modal.style.display = "block";
-        $('#add_edit_price').text('Add Price');
-        $('#price_id').val('');
-        $('#price').val('');
-        AddButtonClick();
-    }
 
-    // Update the input field with selected usernames
-    function updateSelectedUsernames() {
-        let selectedOptions = $('#usernames option:selected');
-        let selectedUsernames = [];
-
-        selectedOptions.each(function () {
-            selectedUsernames.push($(this).text());
-        });
-
-        $('#selectedUsername').val(selectedUsernames.join(', '));
-    }
 </script>
 
 <%@ include file="/WEB-INF/jsp/dashboard/admindashboardfooter.jsp"%>

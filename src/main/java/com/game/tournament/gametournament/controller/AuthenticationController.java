@@ -15,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/rest/authentication/")
+@CrossOrigin("*")
 public class AuthenticationController {
 
     private final AuthenticationService authService;

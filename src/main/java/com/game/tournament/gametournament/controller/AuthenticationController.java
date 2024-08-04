@@ -4,7 +4,7 @@ import com.game.tournament.gametournament.model.AuthenticationResponse;
 import com.game.tournament.gametournament.model.Users;
 import com.game.tournament.gametournament.service.AuthenticationService;
 import com.game.tournament.gametournament.utils.GeneralResponse;
-import com.game.tournament.gametournament.utils.MobileResponseDTOFactory;
+import com.game.tournament.gametournament.utils.ResponseDTOFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class AuthenticationController {
 
     private final AuthenticationService authService;
     @Autowired
-    private MobileResponseDTOFactory mobileResponseDTOFactory;
+    private ResponseDTOFactory ResponseDTOFactory;
 
     public AuthenticationController(AuthenticationService authService) {
         this.authService = authService;
@@ -32,7 +32,7 @@ public class AuthenticationController {
             //return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", authService.register(request)), HttpStatus.OK);
             return authService.register(request);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return ResponseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -42,7 +42,7 @@ public class AuthenticationController {
             //return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", authService.authenticate(request)), HttpStatus.OK);
             return authService.authenticate(usersrequest);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return ResponseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -52,7 +52,7 @@ public class AuthenticationController {
             //return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", authService.register(request)), HttpStatus.OK);
             return authService.forgetPassword(request);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return ResponseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -61,7 +61,7 @@ public class AuthenticationController {
         try {
             return authService.tokenAuthenticate(param,request);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return ResponseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -70,7 +70,7 @@ public class AuthenticationController {
         try {
             return authService.logout(param,request);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return ResponseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -80,7 +80,7 @@ public class AuthenticationController {
             return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", authService.adminDetailsByUsername(param,request)), HttpStatus.OK);
 
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return ResponseDTOFactory.reportInternalServerError(e);
         }
     }
 }

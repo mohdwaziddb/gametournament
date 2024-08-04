@@ -1,20 +1,16 @@
 package com.game.tournament.gametournament.utils;
 
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
-import org.hibernate.internal.SessionImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class MobileResponseDTOFactory {
+public class ResponseDTOFactory {
 
 //    public Connection getConnectionFromEntityManager(EntityManager entityManager) {
 //        entityManager = entityManager.getEntityManagerFactory().createEntityManager();
@@ -27,16 +23,16 @@ public class MobileResponseDTOFactory {
 //        return conn;
 //    }
 
-    public ResponseEntity<MobileResponseDTO> successMessage(String message) {
-        MobileResponseDTO responseDTO = new MobileResponseDTO();
+    public ResponseEntity<ResponseDTO> successMessage(String message) {
+        ResponseDTO responseDTO = new ResponseDTO();
         responseDTO.setCode(HttpStatus.OK.value());
         responseDTO.setMessage(message);
         responseDTO.setSuccess(true);
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
-    public ResponseEntity<MobileResponseDTO> failedMessage(String message) {
-        MobileResponseDTO responseDTO = new MobileResponseDTO();
+    public ResponseEntity<ResponseDTO> failedMessage(String message) {
+        ResponseDTO responseDTO = new ResponseDTO();
         responseDTO.setCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
         responseDTO.setMessage(message);
         return new ResponseEntity<>(responseDTO, HttpStatus.UNPROCESSABLE_ENTITY);
@@ -50,14 +46,14 @@ public class MobileResponseDTOFactory {
         errorlist.add(map);
     }
 
-    public ResponseEntity<MobileResponseDTO> reportInternalServerError(Throwable e) {
-        MobileResponseDTO mobileResponseDTO = new MobileResponseDTO();
-        mobileResponseDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        mobileResponseDTO.setMessage("Some unknown error occured.");
+    public ResponseEntity<ResponseDTO> reportInternalServerError(Throwable e) {
+        ResponseDTO ResponseDTO = new ResponseDTO();
+        ResponseDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        ResponseDTO.setMessage("Some unknown error occured.");
         System.out.println("The cause of exception : " + e.getCause());
         System.err.println("The cause of exception : " + e.getCause());
         e.printStackTrace();
-        return new ResponseEntity<MobileResponseDTO>(mobileResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<ResponseDTO>(ResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public String getCurrentUserName(HttpServletRequest request) {

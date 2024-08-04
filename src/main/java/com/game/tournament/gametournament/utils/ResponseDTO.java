@@ -12,7 +12,7 @@ import java.util.Map;
 @JsonSerialize(include=JsonSerialize.Inclusion.NON_EMPTY)
 @Getter
 @Setter
-public class MobileResponseDTO {
+public class ResponseDTO {
     private boolean success;
     private Integer code;
     private String message;

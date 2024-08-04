@@ -3,7 +3,7 @@ package com.game.tournament.gametournament.service;
 import com.game.tournament.gametournament.model.*;
 import com.game.tournament.gametournament.repository.*;
 import com.game.tournament.gametournament.utils.DataTypeUtility;
-import com.game.tournament.gametournament.utils.MobileResponseDTOFactory;
+import com.game.tournament.gametournament.utils.ResponseDTOFactory;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.razorpay.Order;
@@ -50,7 +50,7 @@ public class GameService {
     private TournamentPriceRepo tournamentPriceRepo;
 
     @Autowired
-    private MobileResponseDTOFactory mobileResponseDTOFactory;
+    private ResponseDTOFactory ResponseDTOFactory;
 
     @Autowired
     private TournamentRepo tournamentRepo;
@@ -78,11 +78,11 @@ public class GameService {
                 games.setDescription(description);
 
                 gameRepo.save(games);
-                return mobileResponseDTOFactory.successMessage("Successfully Save");
+                return ResponseDTOFactory.successMessage("Successfully Save");
             }
         } else {
             if(name==null || name.equals("")){
-                return mobileResponseDTOFactory.failedMessage("Name Cannot be blank");
+                return ResponseDTOFactory.failedMessage("Name Cannot be blank");
             }
 
             Games games = new Games();
@@ -90,10 +90,10 @@ public class GameService {
             games.setDescription(description);
             games.setCreatedon(DataTypeUtility.getCurrentDateTimeInIndianFormatUI());
             gameRepo.save(games);
-            return mobileResponseDTOFactory.successMessage("Successfully Save");
+            return ResponseDTOFactory.successMessage("Successfully Save");
         }
 
-        return mobileResponseDTOFactory.failedMessage("Cannot Save");
+        return ResponseDTOFactory.failedMessage("Cannot Save");
 
     }
 
@@ -119,10 +119,10 @@ public class GameService {
                 Games games = gameRepo.findById(id).get();
                 games.setIsdeleted(true);
                 gameRepo.save(games);
-                return mobileResponseDTOFactory.successMessage("Successfully Delete");
+                return ResponseDTOFactory.successMessage("Successfully Delete");
             }
         }
-        return mobileResponseDTOFactory.failedMessage("Cannot Delete");
+        return ResponseDTOFactory.failedMessage("Cannot Delete");
     }
 
     @Transactional
@@ -136,20 +136,20 @@ public class GameService {
                 tournamentPrice.setPrice(price);
 
                 tournamentPriceRepo.save(tournamentPrice);
-                return mobileResponseDTOFactory.successMessage("Successfully Save");
+                return ResponseDTOFactory.successMessage("Successfully Save");
             }
         } else {
             if(price==null || price.equals("")){
-                return mobileResponseDTOFactory.failedMessage("Price Cannot be blank");
+                return ResponseDTOFactory.failedMessage("Price Cannot be blank");
             }
 
             TournamentPrice tournamentPrice = new TournamentPrice();
             tournamentPrice.setPrice(price);
             tournamentPriceRepo.save(tournamentPrice);
-            return mobileResponseDTOFactory.successMessage("Successfully Save");
+            return ResponseDTOFactory.successMessage("Successfully Save");
         }
 
-        return mobileResponseDTOFactory.failedMessage("Cannot Save");
+        return ResponseDTOFactory.failedMessage("Cannot Save");
 
     }
 
@@ -174,10 +174,10 @@ public class GameService {
             if(present){
                 TournamentPrice tournamentPrice = tournamentPriceRepo.findById(id).get();
                 tournamentPriceRepo.delete(tournamentPrice);
-                return mobileResponseDTOFactory.successMessage("Successfully Delete");
+                return ResponseDTOFactory.successMessage("Successfully Delete");
             }
         }
-        return mobileResponseDTOFactory.failedMessage("Cannot Delete");
+        return ResponseDTOFactory.failedMessage("Cannot Delete");
     }
 
     @Transactional
@@ -215,39 +215,39 @@ public class GameService {
         //boolean isDateAfterTwoDays = isDateWithinRange(date);
 
         if(isStartTimeBeforeEndTime){
-            return mobileResponseDTOFactory.failedMessage("Start Time before End Time");
+            return ResponseDTOFactory.failedMessage("Start Time before End Time");
         }
 
         if(name == null || name.equals("")){
-            return mobileResponseDTOFactory.failedMessage("Name cannot be Blank");
+            return ResponseDTOFactory.failedMessage("Name cannot be Blank");
         }
         if(price == null || price.equals("") || price< 0){
-            return mobileResponseDTOFactory.failedMessage("Price cannot be Blank");
+            return ResponseDTOFactory.failedMessage("Price cannot be Blank");
         }
         if(game == null || game.equals("") || game< 0){
-            return mobileResponseDTOFactory.failedMessage("Game cannot be Blank");
+            return ResponseDTOFactory.failedMessage("Game cannot be Blank");
         }
         if(description == null || description.equals("")){
-            return mobileResponseDTOFactory.failedMessage("Description cannot be Blank");
+            return ResponseDTOFactory.failedMessage("Description cannot be Blank");
         }
         if(date == null || date.equals("")){
-            return mobileResponseDTOFactory.failedMessage("Date cannot be Blank");
+            return ResponseDTOFactory.failedMessage("Date cannot be Blank");
         }
         if(starttime == null || starttime.equals("")){
-            return mobileResponseDTOFactory.failedMessage("Start Time cannot be Blank");
+            return ResponseDTOFactory.failedMessage("Start Time cannot be Blank");
         }
         if(endtime == null || endtime.equals("")){
-            return mobileResponseDTOFactory.failedMessage("End Time cannot be Blank");
+            return ResponseDTOFactory.failedMessage("End Time cannot be Blank");
         }
         if(minimum_player == null || minimum_player.equals("")){
-            return mobileResponseDTOFactory.failedMessage("Minimum Player cannot be Blank");
+            return ResponseDTOFactory.failedMessage("Minimum Player cannot be Blank");
         }
         if(maximum_player == null || maximum_player.equals("")){
-            return mobileResponseDTOFactory.failedMessage("Maximum Player cannot be Blank");
+            return ResponseDTOFactory.failedMessage("Maximum Player cannot be Blank");
         }
 
         if(winner_prizes == null || winner_prizes.equals("") || winner_prizes.equals("[]")){
-            return mobileResponseDTOFactory.failedMessage("Winner prizes not set, Kindly set it...");
+            return ResponseDTOFactory.failedMessage("Winner prizes not set, Kindly set it...");
         }
 
         Gson gson = new Gson();
@@ -266,7 +266,7 @@ public class GameService {
                 Files.copy(file.getInputStream(), uploadPath.resolve(fileName));
             } catch (Exception e) {
                 e.printStackTrace();
-                //return mobileResponseDTOFactory.failedMessage("Failed to save image");
+                //return ResponseDTOFactory.failedMessage("Failed to save image");
             }
         }
 
@@ -319,7 +319,7 @@ public class GameService {
                         }
                         winnerPrizesDetailRepo.saveAll(winnerdetailsmodallist);
                     }
-                    return mobileResponseDTOFactory.successMessage("Successfully Save");
+                    return ResponseDTOFactory.successMessage("Successfully Save");
                     }
                 }
             }
@@ -358,10 +358,10 @@ public class GameService {
                 winnerPrizesDetailRepo.saveAll(winnerdetailsmodallist);
             }
 
-            return mobileResponseDTOFactory.successMessage("Successfully Save");
+            return ResponseDTOFactory.successMessage("Successfully Save");
         }
 
-        return mobileResponseDTOFactory.failedMessage("Cannot Save");
+        return ResponseDTOFactory.failedMessage("Cannot Save");
 
     }
 
@@ -421,10 +421,10 @@ public class GameService {
                 Tournaments tournaments = tournamentRepo.findById(id).get();
                 tournaments.setIsdeleted(true);
                 tournamentRepo.save(tournaments);
-                return mobileResponseDTOFactory.successMessage("Successfully Delete");
+                return ResponseDTOFactory.successMessage("Successfully Delete");
             }
         }
-        return mobileResponseDTOFactory.failedMessage("Cannot Delete");
+        return ResponseDTOFactory.failedMessage("Cannot Delete");
     }
 
     public static boolean compareTimes(String startTime, String endTime) {
@@ -473,7 +473,7 @@ public class GameService {
         Long id = DataTypeUtility.longValue(param.get("id"));
         Map<Long, Object> price_map = DataTypeUtility.getIdFieldMap(tournamentPriceRepo, "price");
         Map<Long, Object> game_map = DataTypeUtility.getIdFieldMap(gameRepo, "name");
-        Long currentUserId = mobileResponseDTOFactory.getCurrentUserId(request);
+        Long currentUserId = ResponseDTOFactory.getCurrentUserId(request);
 
         List<Players> all_join_tournament_list_byuserid = playerRepo.findAllByUserid(currentUserId);
         HashSet<Long> join_tournament_set = new HashSet<>();
@@ -561,7 +561,7 @@ public class GameService {
         Long id = DataTypeUtility.longValue(param.get("id"));
         String transactionid = DataTypeUtility.stringValue(param.get("transactionid"));
         Long userid = DataTypeUtility.longValue(param.get("userid"));
-        Long currentUserId = mobileResponseDTOFactory.getCurrentUserId(request);
+        Long currentUserId = ResponseDTOFactory.getCurrentUserId(request);
         String currentDateTimeInIndianFormat = DataTypeUtility.getCurrentDateTimeInIndianFormatUI();
 
 
@@ -573,7 +573,7 @@ public class GameService {
         players.setCreatedon(currentDateTimeInIndianFormat);
         players.setTransactionid(transactionid);
         playerRepo.save(players);
-        return mobileResponseDTOFactory.successMessage("Successfully Save");
+        return ResponseDTOFactory.successMessage("Successfully Save");
 
     }
 
@@ -598,7 +598,7 @@ public class GameService {
         String orderid = DataTypeUtility.stringValue(order.get("id"));
         String currency = DataTypeUtility.stringValue(order.get("currency"));
         Integer amount = DataTypeUtility.integerValue(order.get("amount"));
-        Long currentUserId = mobileResponseDTOFactory.getCurrentUserId(request);
+        Long currentUserId = ResponseDTOFactory.getCurrentUserId(request);
         List<Users> user_list = userRepository.findAll();
         Map<Long,Users> user_map = new HashMap<>();
         if(user_list!=null && user_list.size()>0){
@@ -654,7 +654,7 @@ public class GameService {
         HashMap<String ,Object> resultMap = new HashMap<>();
         Long userid = DataTypeUtility.longValue(param.get("userid"));
         boolean present = userRepository.findAllById(userid).isPresent();
-        String currentUserName = mobileResponseDTOFactory.getCurrentUserName(request);
+        String currentUserName = ResponseDTOFactory.getCurrentUserName(request);
         if(present){
             Users usermodal = userRepository.findAllById(userid).get();
             String username = usermodal.getUsername();
@@ -681,7 +681,7 @@ public class GameService {
         String emailid = DataTypeUtility.stringValue(param.get("emailid"));
         String phoneno = DataTypeUtility.stringValue(param.get("phoneno"));
         boolean present = userRepository.findAllById(userid).isPresent();
-        String currentUserName = mobileResponseDTOFactory.getCurrentUserName(request);
+        String currentUserName = ResponseDTOFactory.getCurrentUserName(request);
         if(present){
             Users usermodal = userRepository.findAllById(userid).get();
             String username = usermodal.getUsername();
@@ -691,11 +691,11 @@ public class GameService {
                 usermodal.setEmailid(emailid);
                 usermodal.setMobileno(phoneno);
                 userRepository.save(usermodal);
-                return mobileResponseDTOFactory.successMessage("Profile Update Successfully");
+                return ResponseDTOFactory.successMessage("Profile Update Successfully");
             }
         }
 
-        return mobileResponseDTOFactory.failedMessage("Cannot Save");
+        return ResponseDTOFactory.failedMessage("Cannot Save");
     }
 
     public Object getTournamentAndUserDetails(Map<String,Object> param, HttpServletRequest request) throws Exception {
@@ -809,10 +809,10 @@ public class GameService {
 
             }
             winnerPrizesDetailRepo.saveAll(modal_list);
-            return mobileResponseDTOFactory.successMessage("Save Successfully");
+            return ResponseDTOFactory.successMessage("Save Successfully");
         }
 
-        return mobileResponseDTOFactory.failedMessage("Cannot Save");
+        return ResponseDTOFactory.failedMessage("Cannot Save");
     }
 
     public Object getWinnersTournamentList(Map<String,Object> param) throws Exception {

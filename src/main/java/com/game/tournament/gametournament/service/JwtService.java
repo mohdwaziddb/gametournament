@@ -2,7 +2,7 @@ package com.game.tournament.gametournament.service;
 
 import com.game.tournament.gametournament.model.Users;
 import com.game.tournament.gametournament.repository.TokenRepository;
-import com.game.tournament.gametournament.utils.MobileResponseDTOFactory;
+import com.game.tournament.gametournament.utils.ResponseDTOFactory;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -25,7 +25,7 @@ public class JwtService {
     private final TokenRepository tokenRepository;
 
     @Autowired
-    private MobileResponseDTOFactory mobileResponseDTOFactory;
+    private ResponseDTOFactory ResponseDTOFactory;
 
     public JwtService(TokenRepository tokenRepository) {
         this.tokenRepository = tokenRepository;
@@ -84,7 +84,7 @@ public class JwtService {
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         Claims claims = extractAllClaims(token);
         if(claims==null){
-            //return (T) mobileResponseDTOFactory.failedMessage("JWT Token Expire");
+            //return (T) ResponseDTOFactory.failedMessage("JWT Token Expire");
             return null;
         }
         return resolver.apply(claims);

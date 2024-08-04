@@ -37,4 +37,19 @@ public class GameMVCController {
         return "dashboard/editprofile";
     }
 
+    @RequestMapping(value = "/activetournament",method = {RequestMethod.GET,RequestMethod.POST})
+    public String activetournament(){
+        return "dashboard/activetournament";
+    }
+
+    @RequestMapping(value = "/alljointournament",method = {RequestMethod.GET,RequestMethod.POST})
+    public String alljointournament(){
+        return "dashboard/alljointournament";
+    }
+
+    @RequestMapping(value = "/winningtournament",method = {RequestMethod.GET,RequestMethod.POST})
+    public String winningtournament(){
+        return "dashboard/winningtournament";
+    }
+
 }

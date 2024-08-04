@@ -2,7 +2,7 @@ package com.game.tournament.gametournament.controller;
 
 import com.game.tournament.gametournament.service.GameService;
 import com.game.tournament.gametournament.utils.GeneralResponse;
-import com.game.tournament.gametournament.utils.MobileResponseDTOFactory;
+import com.game.tournament.gametournament.utils.ResponseDTOFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +18,7 @@ import java.util.Map;
 public class GameRestController {
 
     @Autowired
-    private MobileResponseDTOFactory mobileResponseDTOFactory;
+    private ResponseDTOFactory responseDTOFactory;
     @Autowired
     private GameService gameService;
 
@@ -30,7 +30,7 @@ public class GameRestController {
             //return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.createGame(param)), HttpStatus.OK);
             return gameService.createGame(param);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -40,7 +40,7 @@ public class GameRestController {
             return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.gamesList(param)), HttpStatus.OK);
             //return gameService.gamesList(param);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -50,7 +50,7 @@ public class GameRestController {
         try {
             return gameService.deleteGame(param);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -59,7 +59,7 @@ public class GameRestController {
         try {
             return gameService.createPrice(param);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -68,7 +68,7 @@ public class GameRestController {
         try {
             return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.priceList(param)), HttpStatus.OK);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -77,7 +77,7 @@ public class GameRestController {
         try {
             return gameService.deletePrice(param);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -86,7 +86,7 @@ public class GameRestController {
         try {
             return gameService.createTournament(file,param);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -96,7 +96,7 @@ public class GameRestController {
         try {
             return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getTournaments(param)), HttpStatus.OK);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -105,7 +105,7 @@ public class GameRestController {
         try {
             return gameService.deleteTournament(param);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
     //@PreAuthorize("hasRole('Admin')")
@@ -114,7 +114,7 @@ public class GameRestController {
         try {
             return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getTournamentsForUser(param,request)), HttpStatus.OK);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -124,7 +124,7 @@ public class GameRestController {
         try {
             return gameService.joiningTournament(param,request);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -133,7 +133,7 @@ public class GameRestController {
         try {
             return gameService.createTransaction(param,request);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -142,7 +142,7 @@ public class GameRestController {
         try {
             return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getPlayerDetails(param,request)), HttpStatus.OK);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -151,7 +151,7 @@ public class GameRestController {
         try {
             return gameService.getUserDetailsById(param,request);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -160,7 +160,7 @@ public class GameRestController {
         try {
             return gameService.saveUserDetailsById(param,request);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -170,7 +170,7 @@ public class GameRestController {
             return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getTournamentAndUserDetails(param,request)), HttpStatus.OK);
 
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -179,7 +179,7 @@ public class GameRestController {
         try {
             return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getActiveTournament(param)), HttpStatus.OK);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -188,7 +188,7 @@ public class GameRestController {
         try {
             return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getWinnersData(param)), HttpStatus.OK);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -197,7 +197,7 @@ public class GameRestController {
         try {
             return gameService.saveWinnersData(param,request);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
@@ -206,7 +206,7 @@ public class GameRestController {
         try {
             return new ResponseEntity<>(new GeneralResponse<>(true, "Successfully", gameService.getWinnersTournamentList(param)), HttpStatus.OK);
         } catch (Exception e) {
-            return mobileResponseDTOFactory.reportInternalServerError(e);
+            return responseDTOFactory.reportInternalServerError(e);
         }
     }
 
